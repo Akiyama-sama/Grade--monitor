@@ -2,113 +2,118 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Re-layout the dashboard's top-center comprehensive results area so status, smart thickness, level distribution, radar chart, and action buttons read clearly without overflowing the existing container.
+**Goal:** Re-layout the dashboard's top-center comprehensive results area into one line-divided container with a left results-and-buttons zone and a tighter right radar zone.
 
-**Architecture:** Keep the redesign scoped to `src/components/regions/CenterDashboardRegion.tsx` by rebuilding the `ComprehensiveResults` section into a two-row composition: top summary row with a left information block and a right lightweight radar card, then a dedicated action-button row below. Keep all data sources and action callbacks unchanged, and verify the new arrangement with TypeScript, production build, and Playwright screenshots at 1920x1080.
+**Architecture:** Keep the redesign scoped to `src/components/regions/CenterDashboardRegion.tsx` by removing the current card-style wrappers from `ComprehensiveResults` and rebuilding it as a single horizontally split box. The left side will contain an upper summary row and a lower button row separated by a line, while the right side will hold a tighter radar area with `146kg` preserved as a low-priority visual element. Verify the result with TypeScript, production build, and Playwright at 1920x1080.
 
 **Tech Stack:** React 19, TypeScript, Vite, Tailwind CSS 4, Recharts, Playwright CLI
 
 ---
 
-### Task 1: Restructure the comprehensive results layout
+### Task 1: Rebuild the comprehensive results area into one line-divided container
 
 **Files:**
 - Modify: `src/components/regions/CenterDashboardRegion.tsx`
 
-- [x] **Step 1: Replace the current mixed header layout with a two-row shell**
+- [x] **Step 1: Replace the current card-based layout with one outer split container**
 
-Update `ComprehensiveResults` so its outer content becomes:
+Update `ComprehensiveResults` so its main structure becomes:
 
 ```tsx
-<div className="space-y-4 xl:space-y-5">
-  <div className="grid gap-4 xl:grid-cols-[minmax(0,1.35fr)_minmax(260px,0.65fr)] xl:items-stretch">
-    {/* left summary block */}
-    {/* right radar card */}
+<div className="grid gap-0 xl:grid-cols-[minmax(0,1.2fr)_minmax(260px,0.8fr)]">
+  <section>{/* left results zone */}</section>
+  <section>{/* right radar zone */}</section>
+</div>
+```
+
+The left section itself should become:
+
+```tsx
+<section className="min-w-0 xl:border-r xl:border-rui-divider/45">
+  <div>{/* upper summary row */}</div>
+  <div className="border-t border-rui-divider/45">{/* lower button row */}</div>
+</section>
+```
+
+Do not wrap either side in separate rounded cards.
+
+- [x] **Step 2: Rebuild the left upper summary row without card wrappers**
+
+Create a flat line-divided summary area that places:
+
+- large `判级中` on the left
+- `综合厚度 + 智能级别` summary on the right
+
+Use layout like:
+
+```tsx
+<div className="grid gap-4 xl:grid-cols-[minmax(260px,0.9fr)_minmax(0,1fr)] xl:items-start">
+  {/* status block */}
+  <div className="grid gap-4 md:grid-cols-[120px_minmax(0,1fr)]">
+    {/* smart thickness */}
+    {/* level distribution */}
   </div>
-  <div className="grid gap-2.5 md:grid-cols-3">
-    {/* action buttons */}
-  </div>
 </div>
 ```
 
-Keep the existing outer wrapper:
+Keep:
+
+- current point badge and warning badge
+- plate number
+- `智能综合厚度` value `6`
+- `重1 20%` / `重2 70%`
+
+- [x] **Step 3: Move the three buttons into the left lower row**
+
+Use a flat row separated by a top border:
 
 ```tsx
-<div className="px-6 py-3 border-b border-rui-divider/60 bg-rui-surface shrink-0">
-```
-
-- [x] **Step 2: Build the left-side summary block**
-
-Create a left summary card that contains:
-
-```tsx
-<div className="min-w-0 rounded-[24px] border border-rui-divider/50 bg-rui-surface-strong/45 p-4 xl:p-5">
-  {/* badge row */}
-  {/* top summary grid: status, smart thickness, level distribution */}
+<div className="grid gap-2.5 pt-3 lg:grid-cols-3">
+  {/* 3 buttons */}
 </div>
 ```
 
-Inside that card:
+The button row must stay inside the left zone so the combined height of left summary + buttons visually matches the right radar section.
 
-- keep current point badge and warning badge
-- render `判级中` as the dominant heading
-- keep the plate number as a supporting blue label
-- add a new `智能综合厚度` block showing a single large value `6`
-- add a separate `智能级别分布` block showing `重1 20%` and `重2 70%` with compact progress bars
+- [x] **Step 4: Rebuild the right radar section as a tighter flat area**
 
-- [x] **Step 3: Move the three action buttons into the dedicated bottom row**
+Replace the current radar card with a flatter section that uses only spacing and dividing lines.
 
-Replace the current wrapped button row with a fixed layout:
+Requirements:
 
-```tsx
-<div className="grid gap-2.5 md:grid-cols-3">
-  <button className="btn-pill ... w-full justify-center">...</button>
-  <button className="btn-pill ... w-full justify-center">...</button>
-  <button className="btn-pill ... w-full justify-center">...</button>
-</div>
-```
+- radar area should be slightly shorter visually than the current version
+- no extra boxed summary block for `146kg`
+- keep only a small heading and the radar chart itself
+- keep the angle labels only
 
-Preserve:
-
-- button labels
-- icons
-- click handlers
-- current semantic color treatment
-
-- [x] **Step 4: Simplify the radar area into a lightweight card**
-
-Replace the current radar section and its detail list with a compact card structure:
+Suggested structure:
 
 ```tsx
-<section className="min-w-0">
-  <div className="relative h-full rounded-[24px] border border-rui-divider/50 bg-rui-surface-strong/45 p-4 xl:p-5">
-    {/* title */}
-    {/* top-right 146kg summary */}
-    {/* fixed-size radar wrapper */}
+<section className="min-w-0 xl:pl-5">
+  <div className="relative h-full py-2">
+    {/* subtle 146kg background */}
+    {/* heading */}
+    {/* compact radar wrapper */}
   </div>
 </section>
 ```
 
-Preserve:
+- [x] **Step 5: Preserve `146kg` as a low-priority visual element**
 
-- `ResponsiveContainer`
-- `RadarChart`
-- `PolarGrid`
-- `PolarAngleAxis`
-- `Radar`
+Keep `146kg`, but change it from a foreground summary card to one of these low-priority treatments:
 
-Remove:
+```tsx
+<div className="absolute inset-x-0 top-1/2 -translate-y-1/2 text-center ...">146</div>
+```
 
-- the right-side deduction summary text block
-- the 6-item deduction list grid
-- the large standalone `146kg` headline treatment
+or an equally unobtrusive alternative in the same spirit.
 
-- [x] **Step 5: Make the radar labels lighter and chart-led**
+- [x] **Step 6: Keep the chart compact and label-led**
 
 Adjust the radar chart props to emphasize the chart itself:
 
 ```tsx
-<RadarChart cx="50%" cy="52%" outerRadius="76%" data={DEDUCTION_DATA}>
+<RadarChart cx="50%" cy="54%" outerRadius="70%" data={DEDUCTION_DATA}>
   <PolarGrid stroke={CHART_COLORS.divider} />
   <PolarAngleAxis
     dataKey="name"
@@ -120,7 +125,7 @@ Adjust the radar chart props to emphasize the chart itself:
 
 Keep only the angle labels around the chart. Do not render any extra explanatory paragraphs alongside it.
 
-- [x] **Step 6: Run type-check after the layout refactor**
+- [x] **Step 7: Run type-check after the layout refactor**
 
 Run:
 
@@ -169,9 +174,10 @@ Expected:
 
 - screenshot saved successfully
 - top comprehensive results area shows:
-  - top-left status/thickness/level block
-  - top-right lightweight radar card
-  - bottom button row
+  - one outer container split left/right
+  - left upper summary row
+  - left lower button row
+  - right tighter radar section
 
 - [x] **Step 4: Inspect console and layout for regressions**
 
@@ -193,10 +199,10 @@ Update this plan file so completed steps are checked off.
 
 ## Self-Review
 
-- Spec coverage: the plan covers the approved top summary block, compact radar card, bottom action row, and Playwright self-check.
+- Spec coverage: the plan covers the approved flat split layout, left upper summary, left lower buttons, tighter radar area, preserved but unobtrusive `146kg`, and Playwright self-check.
 - Placeholder scan: no `TODO`/`TBD` placeholders remain.
 - Type consistency: the plan only modifies `ComprehensiveResults` in `CenterDashboardRegion.tsx` and keeps existing callback/data contracts intact.
 
 ## Execution Handoff
 
-User instruction `开始` is treated as approval to execute this plan inline in the current session.
+User instruction `开始执行` is treated as approval to execute this plan inline in the current session on `main`.

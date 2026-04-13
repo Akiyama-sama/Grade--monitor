@@ -114,10 +114,11 @@ interface VideoFeedProps {
   title: string;
   icon: ElementType;
   src: string;
+  className?: string;
 }
 
-export const VideoFeed = memo(({ title, icon: Icon, src }: VideoFeedProps) => (
-  <div className="relative bg-rui-overlay rounded-[20px] overflow-hidden border border-rui-divider/60 group w-full flex-1 min-h-0 mx-auto">
+export const VideoFeed = memo(({ title, icon: Icon, src, className = 'w-full flex-1' }: VideoFeedProps) => (
+  <div className={`relative bg-rui-overlay rounded-[20px] overflow-hidden border border-rui-divider/60 group min-h-0 mx-auto ${className}`}>
     <img
       src={src}
       alt={title}
