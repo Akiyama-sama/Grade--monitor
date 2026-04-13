@@ -158,13 +158,18 @@ const MATERIAL_DATA: GradingData[] = [
 ];
 
 const DEDUCTION_DATA: DeductionItem[] = [
-  { name: '基础扣杂', value: 1.2, unit: '%' },
+  { name: '基础扣杂', value: 1.2, unit: 'kg' },
   { name: '碎渣扣杂', value: 45, unit: 'kg' },
   { name: '土杂扣杂', value: 12, unit: 'kg' },
-  { name: '油污扣杂', value: 0.1, unit: '%' },
-  { name: '锈蚀扣杂', value: 0.2, unit: '%' },
-  { name: '水杂扣杂', value: 0.4, unit: '%' },
+  { name: '油污扣杂', value: 0.1, unit: 'kg' },
+  { name: '锈蚀扣杂', value: 0.2, unit: 'kg' },
+  { name: '水杂扣杂', value: 0.4, unit: 'kg' },
 ];
+
+const DEDUCTION_TOTAL = {
+  value: 146,
+  unit: 'kg',
+};
 
 const GALLERY_DATA = [
   {
@@ -586,97 +591,167 @@ const AnalysisPanel = memo(({ onShowDetails, onAction }: { onShowDetails: () => 
 
 AnalysisPanel.displayName = 'AnalysisPanel';
 
-const ComprehensiveResults = memo(({ onAction }: { onAction: (type: 'abnormal' | 'end' | 'leave') => void }) => (
-  <div className="px-6 py-3 border-b border-rui-divider/60 bg-rui-surface shrink-0">
-    <div className="flex items-start gap-10">
-      {/* 1. Status & Actions */}
-      <div className="flex flex-col gap-3 shrink-0">
-        <div className="flex items-center h-8">
-          <span className="text-[36px] font-display font-medium text-rui-dark tracking-tighter leading-none">判级中</span>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          <button 
-            onClick={() => onAction('abnormal')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[9999px] border border-rui-warning/30 bg-rui-warning/10 text-rui-warning font-display font-medium text-[11px] hover:bg-rui-warning/15 transition-all active:scale-95"
-          >
-            <AlertTriangle className="w-3 h-3" />
-            异常处理
-          </button>
-          <button 
-            onClick={() => onAction('end')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[9999px] border border-rui-blue/40 bg-rui-blue text-rui-dark font-display font-medium text-[11px] hover:bg-rui-action-blue transition-all active:scale-95"
-          >
-            <CheckCircle2 className="w-3 h-3" />
-            结束判级
-          </button>
-          <button 
-            onClick={() => onAction('leave')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-[9999px] border border-rui-divider/60 bg-rui-surface-strong text-rui-slate font-display font-medium text-[11px] hover:bg-rui-surface-soft transition-all active:scale-95"
-          >
-            <LogOut className="w-3 h-3" />
-            中途离开
-          </button>
-        </div>
-      </div>
+const ComprehensiveResults = memo(({ activePointId, onAction }: { activePointId: string, onAction: (type: 'abnormal' | 'end' | 'leave') => void }) => {
+  const activePoint = MONITORING_POINTS.find(point => point.id === activePointId);
 
-      <div className="h-24 w-px bg-rui-divider/50" />
-
-      {/* 2. Level Distribution - Vertical bars */}
-      <div className="flex flex-col gap-3 shrink-0">
-        <span className="text-[11px] text-rui-gray font-display font-medium uppercase tracking-wider">智能级别分布</span>
-        <div className="flex items-end gap-3 h-12">
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="w-4 bg-rui-divider/40 rounded-t-sm transition-all duration-500" style={{ height: '20%' }} />
-            <span className="text-[10px] text-rui-gray font-display font-medium">重1</span>
-          </div>
-          <div className="flex flex-col items-center gap-1.5">
-            <div className="w-4 bg-rui-blue rounded-t-sm transition-all duration-500" style={{ height: '70%' }} />
-            <span className="text-[10px] text-rui-blue font-display font-medium">重2</span>
-          </div>
-          <div className="flex flex-col justify-end pb-5 ml-2">
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-display font-medium text-rui-dark">20</span>
-              <span className="text-[10px] text-rui-gray font-sans">%</span>
+  return (
+    <div className="px-6 py-3 border-b border-rui-divider/60 bg-rui-surface shrink-0">
+      <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] xl:gap-5">
+        <section className="grid items-start gap-4 xl:grid-cols-[minmax(420px,1.08fr)_minmax(250px,0.92fr)] xl:border-r xl:border-rui-divider/50 xl:pr-5">
+          <div className="min-w-0 xl:col-span-2">
+            <div className="mb-1.5 flex flex-wrap items-center gap-2">
+              <span className="rounded-[9999px] border border-rui-divider/60 bg-rui-surface-strong px-3 py-1 text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-slate">
+                {activePoint?.name ?? '当前监控点'}
+              </span>
+              {activePoint?.status === 'warning' && (
+                <span className="rounded-[9999px] border border-rui-warning/20 bg-rui-warning/10 px-3 py-1 text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-warning">
+                  待复核
+                </span>
+              )}
             </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-lg font-display font-medium text-rui-blue">70</span>
-              <span className="text-[10px] text-rui-blue/60 font-sans">%</span>
+            <div className="flex flex-wrap items-end gap-x-3 gap-y-1">
+              <h2 className="text-[clamp(2.35rem,3vw,3.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-dark">
+                判级中
+              </h2>
+              <div className="pb-1 text-[13px] font-display font-medium tracking-[0.08em] text-rui-blue">
+                {BASIC_INFO.plateNumber}
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <div className="h-24 w-px bg-rui-divider/50" />
-
-      {/* 3. Radar Chart for Deductions */}
-      <div className="flex-1 flex flex-col gap-2 min-w-0">
-        <div className="flex items-center justify-between">
-          <span className="text-[11px] text-rui-gray font-display font-medium uppercase tracking-wider">智能扣杂明细 (雷达图)</span>
-          <div className="flex items-baseline gap-1.5">
-            <span className="text-xl font-display font-medium text-rui-pink tracking-tighter">146</span>
-            <span className="text-[10px] text-rui-pink/60 font-display font-medium uppercase">KG</span>
+          <div className="border-t border-rui-divider/45 pt-3">
+            <div className="flex flex-wrap items-center gap-2 xl:flex-nowrap">
+              <button 
+                onClick={() => onAction('end')}
+                className="btn-pill bg-rui-blue px-4 py-2 text-[13px] whitespace-nowrap text-rui-dark hover:bg-rui-action-blue"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <CheckCircle2 className="h-4 w-4" />
+                  结束判级
+                </span>
+              </button>
+              <button 
+                onClick={() => onAction('abnormal')}
+                className="btn-pill border-rui-warning/30 bg-rui-warning/10 px-4 py-2 text-[13px] whitespace-nowrap text-rui-warning hover:bg-rui-warning/15"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <AlertTriangle className="h-4 w-4" />
+                  异常处理
+                </span>
+              </button>
+              <button 
+                onClick={() => onAction('leave')}
+                className="btn-pill border-rui-divider/60 bg-rui-surface-strong px-4 py-2 text-[13px] whitespace-nowrap text-rui-slate hover:bg-rui-surface-soft"
+              >
+                <span className="flex items-center justify-center gap-2">
+                  <LogOut className="h-4 w-4" />
+                  中途离开
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
-        <div className="h-24 w-full">
-          <ResponsiveContainer width="100%" height="100%">
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={DEDUCTION_DATA}>
-              <PolarGrid stroke={CHART_COLORS.divider} />
-              <PolarAngleAxis dataKey="name" tick={{ fill: CHART_COLORS.gray, fontSize: 9 }} />
-              <Radar
-                name="扣杂"
-                dataKey="value"
-                stroke={CHART_COLORS.pink}
-                fill={CHART_COLORS.pink}
-                fillOpacity={0.22}
-              />
-            </RadarChart>
-          </ResponsiveContainer>
-        </div>
+
+          <div className="min-w-0 border-t border-rui-divider/40 pt-3 xl:border-t-0 xl:border-l xl:border-rui-divider/40 xl:pl-4">
+            <div className="space-y-3">
+              <div className="text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-gray">智能级别判断</div>
+              <div className="flex items-end justify-between gap-4">
+                <div className="flex items-end gap-2">
+                  <span className="text-[clamp(2.55rem,3vw,3.65rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-blue">
+                    重2
+                  </span>
+                  <div className="pb-1 text-[12px] font-sans text-rui-slate">
+                    置信度 95%
+                  </div>
+                </div>
+                <div className="text-[11px] font-display font-medium uppercase tracking-[0.22em] text-rui-blue">
+                  系统建议
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] font-display font-medium uppercase tracking-[0.22em]">
+                    <span className="text-rui-slate">重1</span>
+                    <span className="text-rui-dark">20%</span>
+                  </div>
+                  <div className="h-2 overflow-hidden rounded-full bg-rui-divider/35">
+                    <div className="h-full rounded-full bg-rui-divider-strong" style={{ width: '20%' }} />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-[11px] font-display font-medium uppercase tracking-[0.22em]">
+                    <span className="text-rui-blue">重2</span>
+                    <span className="text-rui-blue">70%</span>
+                  </div>
+                  <div className="h-2.5 overflow-hidden rounded-full bg-rui-divider/35">
+                    <div className="h-full rounded-full bg-rui-blue" style={{ width: '70%' }} />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="min-w-0 border-t border-rui-divider/40 pt-4 xl:border-t-0 xl:pt-0">
+          <div className="grid gap-4 xl:grid-cols-[180px_minmax(0,1fr)] xl:items-center">
+            <div className="h-[158px] min-h-[158px] rounded-[20px] border border-rui-divider/40 bg-rui-surface-strong/55 p-2">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="82%" data={DEDUCTION_DATA}>
+                  <PolarGrid stroke={CHART_COLORS.divider} />
+                  <PolarAngleAxis dataKey="name" tick={{ fill: CHART_COLORS.gray, fontSize: 10 }} />
+                  <Radar
+                    name="扣杂"
+                    dataKey="value"
+                    stroke={CHART_COLORS.pink}
+                    fill={CHART_COLORS.pink}
+                    fillOpacity={0.22}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+
+            <div className="min-w-0 space-y-3">
+              <div className="flex items-end justify-between gap-4">
+                <div>
+                  <div className="text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-gray">智能扣杂雷达</div>
+                  <div className="mt-1 text-[12px] font-display font-medium tracking-[0.08em] text-rui-slate">
+                    总量与各子项扣杂
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-[10px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">智能扣杂总量</div>
+                  <div className="mt-1 flex items-end gap-1">
+                    <span className="text-[clamp(2rem,2.7vw,2.9rem)] font-display font-medium leading-none tracking-[-0.05em] text-rui-pink">
+                      {DEDUCTION_TOTAL.value}
+                    </span>
+                    <span className="pb-0.5 text-[11px] font-display font-medium uppercase tracking-[0.18em] text-rui-pink/70">
+                      {DEDUCTION_TOTAL.unit}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-x-4 gap-y-2">
+                {DEDUCTION_DATA.map((item) => (
+                  <div key={item.name} className="flex items-center justify-between gap-3 rounded-[12px] border border-rui-divider/35 bg-rui-surface-strong/45 px-3 py-2">
+                    <span className="min-w-0 truncate text-[11px] font-display font-medium text-rui-slate">
+                      {item.name}
+                    </span>
+                    <span className="shrink-0 text-[11px] font-display font-medium text-rui-dark">
+                      {item.value}
+                      {item.unit}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
-  </div>
-));
+  );
+});
 
 ComprehensiveResults.displayName = 'ComprehensiveResults';
 
@@ -1127,7 +1202,7 @@ export default function App() {
         <div className="col-span-7 bg-rui-white flex flex-col min-h-0">
           
           {/* 7. Comprehensive Results (Hero) */}
-          <ComprehensiveResults onAction={handleAction} />
+          <ComprehensiveResults activePointId={activePointId} onAction={handleAction} />
 
           {/* 4. Video Feeds & Image Sidebar - Side by side */}
           <div className="flex-1 flex min-h-0 overflow-hidden">
