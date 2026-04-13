@@ -3,42 +3,73 @@
 
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Outfit", sans-serif;
+  --font-display: "Outfit", "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
 
-  /* Revolut UI Tokens - Dark Mode */
-  --color-rui-dark: #ffffff;
-  --color-rui-white: #0a0a0a;
-  --color-rui-surface: #141414;
-  --color-rui-blue: #5a61f1;
-  --color-rui-action-blue: #6d74ff;
-  --color-rui-danger: #ff4d5d;
-  --color-rui-warning: #ff9900;
-  --color-rui-teal: #00c896;
-  --color-rui-pink: #ff3366;
-  --color-rui-yellow: #d4af37;
-  --color-rui-green: #52a41f;
+  /* Revolut-inspired UI Tokens - Dark Mode */
+  --color-rui-dark: #f4f4f4;
+  --color-rui-white: #111418;
+  --color-rui-surface: #191c1f;
+  --color-rui-surface-soft: #161a1f;
+  --color-rui-surface-strong: #22272e;
+  --color-rui-overlay: #0d1014;
+  --color-rui-ink: #191c1f;
+  --color-rui-blue: #494fdf;
+  --color-rui-action-blue: #6167f5;
+  --color-rui-danger: #e23b4a;
+  --color-rui-warning: #ec7e00;
+  --color-rui-teal: #00a87e;
+  --color-rui-pink: #e61e49;
+  --color-rui-yellow: #b09000;
+  --color-rui-green: #428619;
+  --color-rui-brown: #936d62;
   
   /* Neutral Scale - Dark Mode */
-  --color-rui-slate: #9ba3ae;
-  --color-rui-gray: #667085;
-  --color-rui-divider: #262626;
+  --color-rui-slate: #a3abb6;
+  --color-rui-gray: #6f7782;
+  --color-rui-divider: #2c3239;
+  --color-rui-divider-strong: #39414b;
 }
 
 @layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    background-color: var(--color-rui-white);
+  }
+
   body {
     @apply bg-rui-white text-rui-dark antialiased;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    letter-spacing: 0.01em;
   }
 
   h1, h2, h3, h4, h5, h6 {
     @apply font-display font-medium tracking-[-0.02em];
   }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  :focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 0.125rem color-mix(in srgb, var(--color-rui-blue) 55%, transparent);
+  }
+
+  ::selection {
+    background: color-mix(in srgb, var(--color-rui-blue) 28%, transparent);
+  }
 }
 
 /* Revolut Pill Button Base */
 .btn-pill {
-  @apply rounded-[9999px] px-8 py-3.5 font-display font-medium transition-all duration-200 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none;
+  @apply rounded-[9999px] border border-transparent px-8 py-3.5 font-display font-medium tracking-[0.01em] transition-all duration-200 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50;
 }
 
 /* Custom Scrollbar - Minimalist */
@@ -52,7 +83,7 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-rui-divider/50 rounded-full hover:bg-rui-gray/50;
+  @apply rounded-full bg-rui-divider hover:bg-rui-divider-strong;
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -61,4 +92,9 @@
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-rui-divider) transparent;
 }
