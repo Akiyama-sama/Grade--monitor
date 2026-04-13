@@ -17,7 +17,12 @@ import {
   ChevronRight,
   Info,
   Scan,
-  Zap
+  Zap,
+  ChevronDown,
+  LogOut,
+  Settings,
+  CheckCircle2,
+  LayoutGrid
 } from 'lucide-react';
 import { 
   PieChart, 
@@ -30,7 +35,12 @@ import {
   YAxis, 
   Tooltip as RechartsTooltip,
   AreaChart,
-  Area
+  Area,
+  Radar,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis
 } from 'recharts';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -184,6 +194,16 @@ const BASIC_INFO = {
   elapsedMinutes: '--'
 };
 
+const MONITORING_POINTS = [
+  { id: '1', name: '1#监控点', plate: '冀B·1567K', status: 'normal' },
+  { id: '2', name: '2#监控点', plate: '豫N·3205Q', status: 'normal' },
+  { id: '3', name: '3#监控点', plate: '鲁H·7281M', status: 'normal' },
+  { id: '4', name: '4#监控点', plate: '冀A·88888', status: 'warning' },
+  { id: '5', name: '5#监控点', plate: '晋L·6624T', status: 'normal' },
+  { id: '6', name: '6#监控点', plate: '皖S·9031P', status: 'normal' },
+  { id: '7', name: '7#监控点', plate: '苏C·5178X', status: 'normal' },
+];
+
 // --- Optimized Sub-Components ---
 
 const DigitalClock = memo(() => {
@@ -195,9 +215,9 @@ const DigitalClock = memo(() => {
   }, []);
 
   return (
-    <div className="text-right">
-      <div className="text-[7px] text-zinc-600 font-bold mb-0.5 uppercase tracking-tighter">Current Time</div>
-      <span className="text-sm font-mono font-medium text-primary-cyan leading-none">
+    <div className="text-right shrink-0">
+      <div className="text-[9px] text-rui-gray font-display font-medium mb-0.5 uppercase tracking-wider">Current Time</div>
+      <span className="text-sm font-display font-medium text-rui-dark leading-none tabular-nums">
         {time.toLocaleTimeString('en-GB', { hour12: false })}
       </span>
     </div>
@@ -206,61 +226,141 @@ const DigitalClock = memo(() => {
 
 DigitalClock.displayName = 'DigitalClock';
 
-const TopBar = memo(() => (
-  <header className="h-12 border-b border-zinc-900 flex items-center justify-between px-6 bg-black/60 backdrop-blur-xl z-50 shrink-0 relative overflow-hidden">
-    {/* Subtle top glow */}
-    <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary-cyan/20 to-transparent" />
-    
-    <div className="flex items-center gap-4 relative z-10">
-      <div className="flex items-center gap-3">
-        <div className="flex items-baseline gap-2">
-          <span className="text-lg font-black text-white tracking-tight drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]">用友</span>
-          <span className="text-sm font-bold text-primary-cyan tracking-widest drop-shadow-[0_0_8px_rgba(0,202,255,0.3)]">废钢判级平台</span>
+const MonitoringSwitcher = memo(({ activeId, onSelect }: { activeId: string, onSelect: (id: string) => void }) => (
+  <div className="flex-1 flex items-center gap-2 overflow-x-auto no-scrollbar px-4">
+    {MONITORING_POINTS.map((point) => (
+      <button
+        key={point.id}
+        onClick={() => onSelect(point.id)}
+        className={`flex items-center gap-3 px-4 py-1.5 rounded-full border transition-all shrink-0 ${
+          activeId === point.id
+            ? 'bg-rui-blue/10 border-rui-blue/30 text-rui-blue'
+            : point.status === 'warning'
+            ? 'bg-rui-pink/5 border-rui-pink/20 text-rui-pink'
+            : 'bg-rui-surface border-rui-divider/20 text-rui-slate hover:bg-rui-divider/10'
+        }`}
+      >
+        <div className={`w-1.5 h-1.5 rounded-full ${
+          activeId === point.id ? 'bg-rui-blue' : point.status === 'warning' ? 'bg-rui-pink animate-pulse' : 'bg-rui-gray'
+        }`} />
+        <div className="flex items-center gap-2">
+          <span className="text-[12px] font-display font-medium tracking-tight whitespace-nowrap">{point.name}</span>
+          <span className={`text-[11px] font-display font-medium opacity-60 whitespace-nowrap ${activeId === point.id ? 'text-rui-blue' : 'text-rui-slate'}`}>
+            {point.plate}
+          </span>
+        </div>
+        {point.status === 'warning' && (
+          <span className="px-1.5 py-0.5 rounded-full bg-rui-pink/10 text-[9px] font-display font-medium uppercase tracking-wider">
+            预警
+          </span>
+        )}
+      </button>
+    ))}
+  </div>
+));
+
+MonitoringSwitcher.displayName = 'MonitoringSwitcher';
+
+const TopBar = memo(({ activePointId, onPointSelect }: { activePointId: string, onPointSelect: (id: string) => void }) => {
+  const [showNav, setShowNav] = useState(false);
+  const [currentScreen, setCurrentScreen] = useState('图像监控大屏');
+
+  const screens = ['图像监控大屏', '排队区大屏', '监控点总览'];
+
+  return (
+    <header className="h-12 border-b border-rui-divider/30 flex items-center px-6 bg-rui-white z-50 shrink-0 relative">
+      <div className="flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-3">
+          {/* Logo Placeholder */}
+          <div className="w-8 h-8 rounded bg-rui-blue/10 flex items-center justify-center border border-rui-blue/20">
+            <span className="text-[10px] font-black text-rui-blue">LOGO</span>
+          </div>
+          <div className="h-6 w-px bg-rui-divider/30 mx-1" />
+          <div className="relative">
+            <button 
+              onClick={() => setShowNav(!showNav)}
+              className="flex items-center gap-2 group"
+            >
+              <span className="text-xl font-display font-medium text-rui-dark tracking-[-0.03em] group-hover:text-rui-blue transition-colors">
+                {currentScreen}
+              </span>
+              <ChevronDown className={`w-4 h-4 text-rui-slate transition-transform ${showNav ? 'rotate-180' : ''}`} />
+            </button>
+            
+            <AnimatePresence>
+              {showNav && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-0 mt-2 w-48 bg-rui-white border border-rui-divider/30 rounded-xl shadow-2xl z-[60] overflow-hidden"
+                >
+                  {screens.map(screen => (
+                    <button
+                      key={screen}
+                      onClick={() => {
+                        setCurrentScreen(screen);
+                        setShowNav(false);
+                      }}
+                      className={`w-full text-left px-4 py-3 text-sm font-display font-medium transition-colors ${
+                        currentScreen === screen ? 'bg-rui-blue/5 text-rui-blue' : 'text-rui-slate hover:bg-rui-surface'
+                      }`}
+                    >
+                      {screen}
+                    </button>
+                  ))}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </div>
       </div>
-      <div className="h-4 w-px bg-zinc-800 mx-2" />
-      <div className="flex items-center gap-1.5">
-        <div className="w-1.5 h-1.5 rounded-full bg-primary-teal animate-pulse shadow-[0_0_8px_rgba(0,255,222,0.5)]" />
-        <span className="text-[8px] text-zinc-500 uppercase tracking-[0.2em] font-bold">System Active v2.4</span>
-      </div>
-    </div>
 
-    <div className="flex items-center gap-4 relative z-10">
+      <div className="h-6 w-px bg-rui-divider/30 mx-6 shrink-0" />
+
+      <MonitoringSwitcher activeId={activePointId} onSelect={onPointSelect} />
+
+      <div className="h-6 w-px bg-rui-divider/30 mx-6 shrink-0" />
+
       <DigitalClock />
-    </div>
-  </header>
-));
+    </header>
+  );
+});
 
 TopBar.displayName = 'TopBar';
 
-const SectionHeader = memo(({ title, icon: Icon, important = false, badge }: { title: string, icon: any, important?: boolean, badge?: React.ReactNode }) => (
-  <div className={`flex items-center gap-2 mb-2 p-1 rounded-lg transition-colors ${important ? 'bg-primary-cyan/[0.03]' : 'bg-transparent'}`}>
-    <div className={`p-1 rounded shadow-sm ${important ? 'bg-primary-cyan/20 text-primary-cyan shadow-primary-cyan/10' : 'bg-zinc-800 text-zinc-500'}`}>
+const SectionHeader = memo(({ title, icon: Icon, important = false, badge, onMore }: { title: string, icon: any, important?: boolean, badge?: React.ReactNode, onMore?: () => void }) => (
+  <div className={`flex items-center gap-2 mb-2 p-1.5 rounded-lg transition-colors ${important ? 'bg-rui-surface' : 'bg-transparent'}`}>
+    <div className={`p-1.5 rounded-md ${important ? 'bg-rui-blue text-rui-white' : 'bg-rui-surface text-rui-slate'}`}>
       <Icon className="w-3.5 h-3.5" />
     </div>
-    <h3 className={`text-[11px] font-bold uppercase tracking-[0.2em] ${important ? 'text-primary-cyan' : 'text-zinc-500'}`}>
+    <h3 className={`text-[13px] font-display font-medium tracking-tight ${important ? 'text-rui-dark' : 'text-rui-slate'}`}>
       {title}
     </h3>
-    <div className={`flex-1 h-px ${important ? 'bg-primary-cyan/10' : 'bg-zinc-800/30'}`} />
-    {badge}
+    <div className="flex-1" />
+    <div className="flex items-center gap-2">
+      {badge}
+      {onMore && (
+        <button 
+          onClick={onMore}
+          className="flex items-center gap-1 text-[10px] font-display font-medium text-rui-blue hover:text-rui-action-blue transition-colors px-2 py-0.5 rounded-full bg-rui-blue/5 border border-rui-blue/10"
+        >
+          {title.includes('厚度') ? '详情' : '更多'}
+          <ChevronRight className="w-3 h-3" />
+        </button>
+      )}
+    </div>
   </div>
 ));
 
 SectionHeader.displayName = 'SectionHeader';
 
-const DataBox = memo(({ label, value, unit, color = "text-white" }: { label: string, value: string | number, unit?: string, color?: string }) => (
+const DataBox = memo(({ label, value, unit, color = "text-rui-dark" }: { label: string, value: string | number, unit?: string, color?: string }) => (
   <div className="flex flex-col relative pl-3 group">
-    {/* Accent border */}
-    <div className={`absolute left-0 top-1/2 -translate-y-1/2 w-0.5 h-4 rounded-full transition-all duration-300 opacity-40 group-hover:opacity-100 ${
-      color.includes('cyan') ? 'bg-primary-cyan' : 
-      color.includes('blue') ? 'bg-primary-blue' : 
-      color.includes('warm') ? 'bg-warm-amber' : 'bg-zinc-700'
-    }`} />
-    
-    <span className="text-[10px] text-zinc-600 uppercase font-mono tracking-widest mb-0.5 group-hover:text-zinc-400 transition-colors">{label}</span>
+    <span className="text-[11px] text-rui-slate font-sans tracking-[0.02em] mb-0.5 transition-colors">{label}</span>
     <div className="flex items-baseline gap-1">
-      <span className={`text-2xl font-display font-bold tabular-nums tracking-tight transition-all duration-300 group-hover:scale-105 origin-left ${color}`}>{value}</span>
-      {unit && <span className="text-[10px] text-zinc-700 font-mono font-medium">{unit}</span>}
+      <span className={`text-2xl font-display font-medium tabular-nums tracking-[-0.03em] transition-all duration-300 ${color}`}>{value}</span>
+      {unit && <span className="text-[11px] text-rui-gray font-sans font-medium">{unit}</span>}
     </div>
   </div>
 ));
@@ -269,32 +369,26 @@ DataBox.displayName = 'DataBox';
 
 const AlarmItemCard = memo(({ item }: { item: AlarmItem }) => {
   const isDanger = item.status === 'danger' || item.system > 0;
-  const colorClass = item.category === 'seal' 
-    ? (isDanger ? 'bg-warm-amber/10 border-warm-amber/30' : 'bg-zinc-900/50 border-zinc-800/50')
-    : (isDanger ? 'bg-warm-orange/10 border-warm-orange/30' : 'bg-zinc-900/50 border-zinc-800/50');
-  
-  const textColorClass = item.category === 'seal'
-    ? (isDanger ? 'text-warm-amber' : 'text-zinc-500')
-    : (isDanger ? 'text-warm-orange' : 'text-zinc-500');
-
-  const accentColorClass = item.category === 'seal' ? 'text-warm-amber' : 'text-warm-orange';
+  const colorClass = isDanger ? 'bg-rui-pink/10 border-rui-pink/20' : 'bg-rui-surface border-transparent';
+  const textColorClass = isDanger ? 'text-rui-pink' : 'text-rui-dark';
+  const accentColorClass = 'text-rui-pink';
 
   return (
-    <div className={`p-2 rounded border transition-all ${colorClass}`}>
-      <div className="flex justify-between items-start mb-1.5">
-        <span className={`text-[10px] font-bold tracking-tight ${textColorClass}`}>
+    <div className={`p-3 rounded-[16px] border transition-all ${colorClass}`}>
+      <div className="flex justify-between items-start mb-2">
+        <span className={`text-[13px] font-display font-medium tracking-tight ${textColorClass}`}>
           {item.name}
         </span>
-        {isDanger && <AlertTriangle className={`w-3 h-3 animate-bounce ${accentColorClass}`} />}
+        {isDanger && <AlertTriangle className={`w-3.5 h-3.5 ${accentColorClass}`} />}
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <div>
-          <div className="text-[8px] text-zinc-600 uppercase font-bold tracking-wider mb-0.5">系统</div>
-          <div className={`text-sm font-display font-bold tabular-nums ${item.system > 0 ? accentColorClass : 'text-zinc-700'}`}>{item.system}</div>
+          <div className="text-[9px] text-rui-slate font-display font-medium uppercase tracking-wider mb-0.5">系统</div>
+          <div className={`text-base font-display font-medium tabular-nums ${item.system > 0 ? accentColorClass : 'text-rui-dark'}`}>{item.system}</div>
         </div>
         <div className="text-right">
-          <div className="text-[8px] text-zinc-600 uppercase font-bold tracking-wider mb-0.5">复核</div>
-          <div className="text-sm font-display font-bold tabular-nums text-zinc-700">{item.review}</div>
+          <div className="text-[9px] text-rui-slate font-display font-medium uppercase tracking-wider mb-0.5">复核</div>
+          <div className="text-base font-display font-medium tabular-nums text-rui-dark">{item.review}</div>
         </div>
       </div>
     </div>
@@ -304,9 +398,9 @@ const AlarmItemCard = memo(({ item }: { item: AlarmItem }) => {
 AlarmItemCard.displayName = 'AlarmItemCard';
 
 const InfoStreamItem = memo(({ msg }: { msg: MessagePrompt }) => (
-  <div className="flex gap-2 items-start">
-    <span className="text-[7px] text-zinc-800 font-mono mt-0.5">{msg.time}</span>
-    <p className={`text-[8px] leading-tight ${msg.type === 'danger' ? 'text-warm-red/70' : 'text-zinc-600'}`}>
+  <div className="flex gap-3 items-start p-2 rounded-lg hover:bg-rui-surface transition-colors">
+    <span className="text-[10px] text-rui-gray font-sans mt-0.5">{msg.time}</span>
+    <p className={`text-[12px] font-sans leading-relaxed ${msg.type === 'danger' ? 'text-rui-danger font-medium' : 'text-rui-slate'}`}>
       {msg.content}
     </p>
   </div>
@@ -315,162 +409,164 @@ const InfoStreamItem = memo(({ msg }: { msg: MessagePrompt }) => (
 InfoStreamItem.displayName = 'InfoStreamItem';
 
 const PinnedAlert = memo(({ content }: { content: string }) => (
-  <div className="bg-warm-red/90 text-white p-2 rounded flex items-center gap-2 mb-3 shadow-lg shadow-warm-red/20 animate-pulse">
-    <AlertTriangle className="w-3 h-3 shrink-0" />
-    <span className="text-[9px] font-bold leading-tight">{content}</span>
+  <div className="bg-rui-danger text-rui-white p-4 rounded-2xl flex items-center gap-3 mb-4 shadow-sm">
+    <AlertTriangle className="w-5 h-5 shrink-0" />
+    <span className="text-[13px] font-display font-medium leading-tight">{content}</span>
   </div>
 ));
 
 PinnedAlert.displayName = 'PinnedAlert';
 
 const VideoFeed = memo(({ id, title, icon: Icon, src }: { id: string, title: string, icon: any, src: string }) => (
-  <div className="relative rounded-xl overflow-hidden border border-zinc-900 group bg-zinc-900/50 flex items-center justify-center aspect-video">
-    <div className="w-full h-full relative">
-      <div className="absolute top-3 left-3 z-10 flex items-center gap-2 bg-black/80 px-2 py-0.5 rounded-full border border-white/5">
-        <Icon className="w-2.5 h-2.5 text-primary-cyan" />
-        <span className="text-[9px] text-white uppercase tracking-widest">{title} - CAM {id} (1280x720)</span>
+  <div className="relative bg-black rounded-2xl overflow-hidden border border-rui-divider/20 group w-full flex-1 min-h-0 mx-auto">
+    <img 
+      src={src} 
+      alt={title} 
+      className="w-full h-full object-contain"
+      referrerPolicy="no-referrer"
+    />
+    {/* Overlay UI */}
+    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+    
+    <div className="absolute top-3 left-3 flex items-center gap-2">
+      <div className="px-2 py-1 rounded bg-black/40 backdrop-blur-md border border-white/10 flex items-center gap-2">
+        <Icon className="w-3.5 h-3.5 text-rui-blue" />
+        <span className="text-[11px] font-display font-medium text-white tracking-wide uppercase">{title}</span>
       </div>
-      <img 
-        src={src} 
-        className="w-full h-full object-cover opacity-60 group-hover:scale-105 transition-transform duration-1000" 
-        referrerPolicy="no-referrer"
-        loading="lazy"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+      <div className="px-2 py-1 rounded bg-rui-blue/80 backdrop-blur-md text-[10px] font-display font-bold text-white uppercase tracking-wider">
+        LIVE 720P
+      </div>
     </div>
+
+    <div className="absolute bottom-3 right-3 flex items-center gap-2 translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
+      <button className="p-2 rounded-lg bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 transition-colors">
+        <Maximize2 className="w-4 h-4" />
+      </button>
+    </div>
+
+    {/* Scanline Effect */}
+    <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.25)_50%),linear-gradient(90deg,rgba(255,0,0,0.06),rgba(0,255,0,0.02),rgba(0,0,118,0.06))] bg-[length:100%_2px,3px_100%]" />
   </div>
 ));
 
 VideoFeed.displayName = 'VideoFeed';
 
-const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) => (
-  <div className="col-span-3 bg-[#080808] p-3 flex flex-col border-l border-zinc-900 min-h-0">
+const AnalysisPanel = memo(({ onShowDetails, onAction }: { onShowDetails: () => void, onAction: (type: 'abnormal' | 'end' | 'leave') => void }) => (
+  <div className="col-span-3 bg-rui-white p-3 flex flex-col border-l border-rui-divider/30 min-h-0 overflow-y-auto custom-scrollbar">
     {/* Basic Information Section */}
-    <div className="mb-4">
-      <SectionHeader title="基础信息" icon={Info} important />
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2 bg-zinc-900/30 p-3 rounded border border-zinc-800/50">
-        <div className="flex flex-col">
-          <span className="text-[8px] text-zinc-600 uppercase">车号</span>
-          <span className="text-xs font-bold text-primary-cyan">{BASIC_INFO.plateNumber}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[8px] text-zinc-600 uppercase">货名</span>
-          <span className="text-xs font-bold text-zinc-300">{BASIC_INFO.cargoName}</span>
-        </div>
-        <div className="flex flex-col col-span-2">
-          <span className="text-[8px] text-zinc-600 uppercase">供货方</span>
-          <span className="text-xs text-zinc-400 truncate">{BASIC_INFO.supplier}</span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[8px] text-zinc-600 uppercase">毛重</span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm font-bold text-warm-amber">{BASIC_INFO.grossWeight}</span>
-            <span className="text-[8px] text-zinc-600">t</span>
+    <div className="mb-6">
+      <SectionHeader title="基础判级信息" icon={Info} />
+      <div className="bg-rui-surface/50 p-4 rounded-[20px] border border-rui-divider/10 space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">车牌号码</span>
+            <span className="text-[15px] font-display font-medium text-rui-blue tracking-tight">{BASIC_INFO.plateNumber}</span>
+          </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">货名</span>
+            <span className="text-[15px] font-display font-medium text-rui-dark tracking-tight">{BASIC_INFO.cargoName}</span>
           </div>
         </div>
-        <div className="flex flex-col">
-          <span className="text-[8px] text-zinc-600 uppercase">毛重时间</span>
-          <span className="text-[9px] text-zinc-500 font-mono">{BASIC_INFO.grossWeightTime.split(' ')[1]}</span>
+        
+        <div className="flex flex-col pt-3 border-t border-rui-divider/10">
+          <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">供货方</span>
+          <span className="text-[14px] text-rui-dark font-display font-medium truncate">{BASIC_INFO.supplier}</span>
         </div>
-        <div className="flex flex-col col-span-2 pt-1 border-t border-zinc-800/50">
-          <div className="flex justify-between items-center">
-            <span className="text-[8px] text-zinc-600 uppercase">刷卡时间</span>
-            <span className="text-[8px] text-zinc-600 uppercase">已过分钟</span>
+
+        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-rui-divider/10">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">毛重</span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-display font-bold text-rui-warning">{BASIC_INFO.grossWeight}</span>
+              <span className="text-[10px] text-rui-warning font-display font-medium">t</span>
+            </div>
           </div>
-          <div className="flex justify-between items-center">
-            <span className="text-[9px] text-zinc-400 font-mono">{BASIC_INFO.swipeTime}</span>
-            <span className="text-[9px] text-primary-cyan font-mono font-bold">{BASIC_INFO.elapsedMinutes}</span>
+          <div className="flex flex-col">
+            <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">毛重时间</span>
+            <span className="text-[13px] text-rui-dark font-display font-medium tabular-nums">{BASIC_INFO.grossWeightTime.split(' ')[1]}</span>
           </div>
         </div>
       </div>
     </div>
 
-    <div className="flex justify-between items-center mb-2">
-      <SectionHeader title="判级深度分析" icon={BarChart3} important />
-      <button 
-        onClick={onShowDetails}
-        className="p-1 rounded bg-zinc-800 hover:bg-primary-cyan/20 text-zinc-500 hover:text-primary-cyan transition-all"
-      >
-        <Maximize2 className="w-2.5 h-2.5" />
-      </button>
-    </div>
-    
-    {/* Thickness Analysis */}
-    <div className="flex-[1.2] flex flex-col mb-3 min-h-0">
-      <span className="text-[8px] text-zinc-700 uppercase mb-1">厚度占比分布</span>
-      <div className="flex-1 relative min-h-[100px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={THICKNESS_DATA}
-              innerRadius={35}
-              outerRadius={50}
-              paddingAngle={2}
-              dataKey="value"
-              stroke="none"
-            >
-              {THICKNESS_DATA.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-base font-mono text-white">95%</span>
-          <span className="text-[6px] text-zinc-700 uppercase">置信度</span>
+    {/* Grading Depth Analysis Section */}
+    <div className="flex-1 min-h-0 space-y-6">
+      <div className="bg-rui-surface/50 p-4 rounded-[24px] border border-rui-divider/10">
+        <SectionHeader title="智能厚度占比" icon={Activity} onMore={onShowDetails} />
+        <div className="flex items-center gap-6">
+          <div className="w-24 h-24 relative shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={THICKNESS_DATA}
+                  innerRadius={30}
+                  outerRadius={45}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {THICKNESS_DATA.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-lg font-display font-bold text-rui-dark">95%</span>
+              <span className="text-[7px] text-rui-slate font-display font-medium uppercase tracking-widest">置信度</span>
+            </div>
+          </div>
+          <div className="flex-1 space-y-2">
+            {THICKNESS_DATA.map(item => (
+              <div key={item.name} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-[11px] text-rui-slate font-display">{item.name}</span>
+                </div>
+                <span className="text-[11px] font-display font-bold text-rui-dark tabular-nums">{item.value}%</span>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1">
-        {THICKNESS_DATA.map(item => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 rounded-full" style={{ backgroundColor: item.color }} />
-              <span className="text-[7px] text-zinc-600">{item.name}</span>
-            </div>
-            <span className="text-[7px] font-mono text-zinc-400">{item.value}%</span>
-          </div>
-        ))}
-      </div>
-    </div>
 
-    {/* Material Analysis */}
-    <div className="flex-1 flex flex-col min-h-0">
-      <div className="flex justify-between items-center mb-1">
-        <span className="text-[8px] text-zinc-700 uppercase">料型占比分布</span>
-        <span className="text-[6px] text-zinc-800 uppercase">Top 6</span>
-      </div>
-      <div className="flex-1 relative min-h-[100px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <PieChart>
-            <Pie
-              data={MATERIAL_DATA.slice(0, 6)}
-              innerRadius={30}
-              outerRadius={45}
-              paddingAngle={2}
-              dataKey="value"
-              stroke="none"
-            >
-              {MATERIAL_DATA.slice(0, 6).map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
-              ))}
-            </Pie>
-          </PieChart>
-        </ResponsiveContainer>
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span className="text-xs font-mono text-zinc-200">6</span>
-          <span className="text-[5px] text-zinc-700 uppercase">料型</span>
-        </div>
-      </div>
-      <div className="grid grid-cols-2 gap-x-2 gap-y-0.5 mt-1">
-        {MATERIAL_DATA.slice(0, 6).map(item => (
-          <div key={item.name} className="flex items-center justify-between">
-            <div className="flex items-center gap-1">
-              <div className="w-1 h-1 rounded-full" style={{ backgroundColor: item.color }} />
-              <span className="text-[7px] text-zinc-600">{item.name}</span>
+      <div className="bg-rui-surface/50 p-4 rounded-[24px] border border-rui-divider/10">
+        <SectionHeader title="智能料型占比" icon={LayoutGrid} onMore={() => {}} />
+        <div className="flex items-center gap-6">
+          <div className="w-24 h-24 relative shrink-0">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={MATERIAL_DATA.slice(0, 6)}
+                  innerRadius={30}
+                  outerRadius={45}
+                  paddingAngle={2}
+                  dataKey="value"
+                  stroke="none"
+                >
+                  {MATERIAL_DATA.slice(0, 6).map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+              <span className="text-lg font-display font-bold text-rui-dark">6</span>
+              <span className="text-[7px] text-rui-slate font-display font-medium uppercase tracking-widest">料型</span>
             </div>
-            <span className="text-[7px] font-mono text-zinc-400">{item.value}%</span>
           </div>
-        ))}
+          <div className="flex-1 space-y-1.5">
+            {MATERIAL_DATA.slice(0, 6).map(item => (
+              <div key={item.name} className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: item.color }} />
+                  <span className="text-[11px] text-rui-slate font-display">{item.name}</span>
+                </div>
+                <span className="text-[11px] font-display font-bold text-rui-dark tabular-nums">{item.value}%</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -478,111 +574,94 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
 
 AnalysisPanel.displayName = 'AnalysisPanel';
 
-const DeductionExpansion = memo(({ show }: { show: boolean }) => (
-  <AnimatePresence>
-    {show && (
-      <motion.div 
-        initial={{ height: 0, opacity: 0 }}
-        animate={{ height: 'auto', opacity: 1 }}
-        exit={{ height: 0, opacity: 0 }}
-        className="overflow-hidden"
-      >
-        <div className="pt-4 border-t border-zinc-900/50 grid grid-cols-6 gap-4">
-          {DEDUCTION_DATA.map(item => (
-            <div key={item.name} className="flex flex-col p-2.5 bg-zinc-900/30 rounded-lg border border-zinc-800/50 group hover:border-warm-amber/20 transition-colors">
-              <span className="text-[9px] text-zinc-600 uppercase font-bold tracking-wider mb-1.5 group-hover:text-zinc-500 transition-colors">{item.name}</span>
-              <div className="flex items-baseline gap-1">
-                <span className="text-sm font-display font-bold text-zinc-200 tabular-nums">{item.value}</span>
-                <span className="text-[9px] text-zinc-700 font-mono font-medium">{item.unit}</span>
-              </div>
-            </div>
-          ))}
+const ComprehensiveResults = memo(({ onAction }: { onAction: (type: 'abnormal' | 'end' | 'leave') => void }) => (
+  <div className="px-6 py-3 border-b border-rui-divider/30 bg-rui-white shrink-0">
+    <div className="flex items-start gap-10">
+      {/* 1. Status & Actions */}
+      <div className="flex flex-col gap-3 shrink-0">
+        <div className="flex items-center h-8">
+          <span className="text-[36px] font-display font-black text-rui-blue tracking-tighter leading-none">判级中</span>
         </div>
-      </motion.div>
-    )}
-  </AnimatePresence>
-));
-
-DeductionExpansion.displayName = 'DeductionExpansion';
-
-const ComprehensiveResults = memo(({ showDeductionDetails, onToggleDeduction, onAction }: { 
-  showDeductionDetails: boolean, 
-  onToggleDeduction: () => void,
-  onAction: (type: 'abnormal' | 'end') => void
-}) => (
-  <div className="p-4 border-b border-zinc-900 bg-gradient-to-b from-primary-cyan/[0.05] to-transparent shrink-0">
-    <div className="flex flex-col gap-4">
-      <div className="flex items-center justify-between">
-        {/* Data Grid */}
-        <div className="flex items-center gap-10 flex-1">
-          {/* Status */}
-          <div className="shrink-0">
-            <DataBox label="当前判级状态" value="判级中" color="text-primary-cyan" />
-          </div>
-          
-          <div className="h-8 w-px bg-zinc-800/50" />
-
-          {/* Distribution */}
-          <div className="flex flex-col min-w-[180px]">
-            <span className="text-[10px] text-zinc-600 uppercase font-mono tracking-widest mb-1.5">智能级别分布</span>
-            <div className="flex items-center gap-6">
-              <div className="flex items-baseline gap-2">
-                <span className="text-[11px] text-zinc-500 font-bold tracking-tight">重1</span>
-                <span className="text-2xl font-display font-bold tabular-nums text-white">20%</span>
-              </div>
-              <div className="flex items-baseline gap-2">
-                <span className="text-[11px] text-zinc-500 font-bold tracking-tight">重2</span>
-                <span className="text-2xl font-display font-bold tabular-nums text-primary-blue">70%</span>
-              </div>
-            </div>
-            {/* Visual indicator */}
-            <div className="h-1.5 w-full bg-zinc-800 rounded-full mt-2 overflow-hidden flex shadow-inner">
-              <div className="h-full bg-white/40 transition-all duration-500" style={{ width: '20%' }} />
-              <div className="h-full bg-primary-blue transition-all duration-500 shadow-[0_0_8px_rgba(0,101,248,0.4)]" style={{ width: '70%' }} />
-            </div>
-          </div>
-
-          <div className="h-8 w-px bg-zinc-800/50" />
-
-          {/* Thickness */}
-          <div className="shrink-0">
-            <DataBox label="智能综合厚度" value="6" color="text-white" />
-          </div>
-
-          <div className="h-8 w-px bg-zinc-800/50" />
-
-          {/* Deduction */}
-          <div 
-            className="relative group cursor-pointer flex items-center gap-3"
-            onClick={onToggleDeduction}
-          >
-            <DataBox label="智能扣杂总量" value="146" unit="kg" color="text-warm-amber" />
-            <div className={`mt-4 p-1 rounded bg-zinc-800/50 border border-zinc-700/50 transition-all group-hover:bg-zinc-700 ${showDeductionDetails ? 'rotate-180' : ''}`}>
-              <ChevronRight className="w-2.5 h-2.5 text-zinc-500 rotate-90" />
-            </div>
-          </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex flex-col gap-1.5 shrink-0 ml-8 pl-8 border-l border-zinc-800/50">
+        
+        <div className="flex items-center gap-2">
           <button 
             onClick={() => onAction('abnormal')}
-            className="h-8 w-28 px-3 bg-warm-red/10 border border-warm-red/20 text-warm-red text-[9px] font-bold uppercase tracking-[0.15em] rounded-md hover:bg-warm-red/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 shadow-sm shadow-warm-red/5"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rui-warning/30 bg-rui-warning/5 text-rui-warning font-display font-medium text-[11px] hover:bg-rui-warning/10 transition-all active:scale-95"
           >
             <AlertTriangle className="w-3 h-3" />
-            异常车次
+            异常处理
           </button>
           <button 
             onClick={() => onAction('end')}
-            className="h-8 w-28 px-3 bg-zinc-800 border border-zinc-700 text-zinc-300 text-[9px] font-bold uppercase tracking-[0.15em] rounded-md hover:bg-zinc-700 active:scale-95 transition-all flex items-center justify-center gap-1.5"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rui-blue/30 bg-rui-blue/5 text-rui-blue font-display font-medium text-[11px] hover:bg-rui-blue/10 transition-all active:scale-95"
           >
-            <Zap className="w-3 h-3" />
+            <CheckCircle2 className="w-3 h-3" />
             结束判级
+          </button>
+          <button 
+            onClick={() => onAction('leave')}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-rui-divider/30 bg-rui-surface text-rui-slate font-display font-medium text-[11px] hover:bg-rui-divider/10 transition-all active:scale-95"
+          >
+            <LogOut className="w-3 h-3" />
+            中途离开
           </button>
         </div>
       </div>
 
-      <DeductionExpansion show={showDeductionDetails} />
+      <div className="h-24 w-px bg-rui-divider/10" />
+
+      {/* 2. Level Distribution - Vertical bars */}
+      <div className="flex flex-col gap-3 shrink-0">
+        <span className="text-[11px] text-rui-gray font-display font-medium uppercase tracking-wider">智能级别分布</span>
+        <div className="flex items-end gap-3 h-12">
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-4 bg-rui-divider/40 rounded-t-sm transition-all duration-500" style={{ height: '20%' }} />
+            <span className="text-[10px] text-rui-gray font-display font-medium">重1</span>
+          </div>
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="w-4 bg-rui-blue rounded-t-sm transition-all duration-500 shadow-[0_-2px_8px_rgba(90,97,241,0.3)]" style={{ height: '70%' }} />
+            <span className="text-[10px] text-rui-blue font-display font-medium">重2</span>
+          </div>
+          <div className="flex flex-col justify-end pb-5 ml-2">
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-display font-bold text-rui-dark">20</span>
+              <span className="text-[10px] text-rui-gray font-sans">%</span>
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-lg font-display font-bold text-rui-blue">70</span>
+              <span className="text-[10px] text-rui-blue/60 font-sans">%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="h-24 w-px bg-rui-divider/10" />
+
+      {/* 3. Radar Chart for Deductions */}
+      <div className="flex-1 flex flex-col gap-2 min-w-0">
+        <div className="flex items-center justify-between">
+          <span className="text-[11px] text-rui-gray font-display font-medium uppercase tracking-wider">智能扣杂明细 (雷达图)</span>
+          <div className="flex items-baseline gap-1.5">
+            <span className="text-xl font-display font-bold text-rui-pink tracking-tighter">146</span>
+            <span className="text-[10px] text-rui-pink/60 font-display font-medium uppercase">KG</span>
+          </div>
+        </div>
+        <div className="h-24 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={DEDUCTION_DATA}>
+              <PolarGrid stroke="#262626" />
+              <PolarAngleAxis dataKey="name" tick={{ fill: '#667085', fontSize: 9 }} />
+              <Radar
+                name="扣杂"
+                dataKey="value"
+                stroke="#ff3366"
+                fill="#ff3366"
+                fillOpacity={0.3}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
+        </div>
+      </div>
     </div>
   </div>
 ));
@@ -596,52 +675,52 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean, onClose: () => vo
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-xl p-12 overflow-y-auto"
+        className="fixed inset-0 z-[100] bg-rui-white p-8 overflow-y-auto"
       >
-        <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-12">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex justify-between items-center mb-10">
             <div className="flex items-center gap-4">
-              <div className="w-1 h-8 bg-primary-cyan" />
-              <h2 className="text-3xl font-bold text-white tracking-tighter uppercase">判级深度分析详情</h2>
+              <div className="w-1 h-10 bg-rui-blue rounded-full" />
+              <h2 className="text-4xl font-display font-medium text-rui-dark tracking-[-0.04em]">判级深度分析详情</h2>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 hover:bg-white/10 rounded-full transition-colors"
+              className="p-3 hover:bg-rui-surface rounded-full transition-colors"
             >
-              <Maximize2 className="w-8 h-8 text-zinc-500 rotate-45" />
+              <Maximize2 className="w-8 h-8 text-rui-slate rotate-45" />
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-12">
+          <div className="grid grid-cols-2 gap-8">
             {/* Thickness Details */}
-            <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-2xl">
+            <div className="bg-rui-surface p-8 rounded-[24px]">
               <div className="flex items-center gap-3 mb-8">
-                <BarChart3 className="w-5 h-5 text-primary-cyan" />
-                <span className="text-lg font-bold text-white uppercase">厚度占比详情</span>
+                <BarChart3 className="w-5 h-5 text-rui-blue" />
+                <span className="text-lg font-display font-medium text-rui-dark uppercase tracking-wider">厚度占比详情</span>
               </div>
               <div className="space-y-8">
                 {THICKNESS_DATA.map((item) => (
                   <div key={item.name} className="space-y-3">
                     <div className="flex justify-between items-end">
                       <div className="flex items-center gap-3">
-                        <div className="px-3 py-1 rounded bg-zinc-800 text-xs font-bold text-zinc-300 border border-zinc-700">
+                        <div className="px-3 py-1 rounded-full bg-rui-white text-xs font-display font-medium text-rui-dark border border-rui-divider/30">
                           {item.name}
                         </div>
-                        <div className="h-1.5 w-48 bg-zinc-800 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-48 bg-rui-divider/20 rounded-full overflow-hidden">
                           <div 
                             className="h-full rounded-full" 
                             style={{ width: `${item.value}%`, backgroundColor: item.color }} 
                           />
                         </div>
                       </div>
-                      <span className="text-2xl font-bold text-primary-cyan">{item.value}%</span>
+                      <span className="text-2xl font-display font-medium text-rui-blue">{item.value}%</span>
                     </div>
                     {item.subItems && (
-                      <div className="grid grid-cols-2 gap-4 pl-4 border-l border-zinc-800">
+                      <div className="grid grid-cols-2 gap-4 pl-4 border-l-2 border-rui-divider/30">
                         {item.subItems.map(sub => (
                           <div key={sub.name} className="flex justify-between items-center">
-                            <span className="text-xs text-zinc-500">{sub.name}</span>
-                            <span className="text-xs font-mono text-zinc-400">{sub.value}%</span>
+                            <span className="text-xs text-rui-slate font-sans">{sub.name}</span>
+                            <span className="text-xs font-display font-medium text-rui-dark">{sub.value}%</span>
                           </div>
                         ))}
                       </div>
@@ -652,22 +731,22 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean, onClose: () => vo
             </div>
 
             {/* Material Details */}
-            <div className="bg-zinc-900/30 border border-zinc-800 p-8 rounded-2xl">
+            <div className="bg-rui-surface p-8 rounded-[24px]">
               <div className="flex items-center gap-3 mb-8">
-                <Package className="w-5 h-5 text-primary-cyan" />
-                <span className="text-lg font-bold text-white uppercase">更多料型分布</span>
+                <Package className="w-5 h-5 text-rui-blue" />
+                <span className="text-lg font-display font-medium text-rui-dark uppercase tracking-wider">更多料型分布</span>
               </div>
-              <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+              <div className="grid grid-cols-2 gap-x-6 gap-y-4">
                 {MATERIAL_DATA.map((item) => (
-                  <div key={item.name} className="flex items-center gap-4 bg-zinc-900/50 p-3 rounded-lg border border-zinc-800/50">
+                  <div key={item.name} className="flex items-center gap-3 bg-rui-white p-3 rounded-xl border border-rui-divider/20">
                     <div className="flex-1">
-                      <div className="flex justify-between mb-1">
-                        <span className="text-xs font-bold text-zinc-300">{item.name}</span>
-                        <span className="text-xs font-mono text-primary-cyan">{item.value}%</span>
+                      <div className="flex justify-between mb-1.5">
+                        <span className="text-xs font-display font-medium text-rui-dark">{item.name}</span>
+                        <span className="text-xs font-display font-medium text-rui-blue">{item.value}%</span>
                       </div>
-                      <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+                      <div className="h-1 w-full bg-rui-divider/20 rounded-full overflow-hidden">
                         <div 
-                          className="h-full bg-primary-cyan/50" 
+                          className="h-full bg-rui-blue/60" 
                           style={{ width: `${item.value}%` }} 
                         />
                       </div>
@@ -679,18 +758,18 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean, onClose: () => vo
           </div>
 
           {/* Impurity Deductions */}
-          <div className="mt-12 bg-zinc-900/30 border border-zinc-800 p-8 rounded-2xl">
+          <div className="mt-8 bg-rui-surface p-8 rounded-[24px]">
             <div className="flex items-center gap-3 mb-8">
-              <ShieldAlert className="w-5 h-5 text-warm-amber" />
-              <span className="text-lg font-bold text-white uppercase">扣杂详情分析</span>
+              <ShieldAlert className="w-5 h-5 text-rui-pink" />
+              <span className="text-lg font-display font-medium text-rui-dark uppercase tracking-wider">扣杂详情分析</span>
             </div>
             <div className="grid grid-cols-6 gap-6">
               {DEDUCTION_DATA.map((item) => (
-                <div key={item.name} className="flex flex-col items-center p-6 bg-zinc-900/50 rounded-xl border border-zinc-800 hover:border-warm-amber/30 transition-colors group">
-                  <span className="text-[10px] text-zinc-500 uppercase mb-3 group-hover:text-warm-amber/50 transition-colors">{item.name}</span>
+                <div key={item.name} className="flex flex-col items-center p-6 bg-rui-white rounded-2xl border border-rui-divider/20 hover:border-rui-pink/30 transition-colors group">
+                  <span className="text-[11px] text-rui-slate font-display font-medium uppercase tracking-wider mb-3 group-hover:text-rui-pink/70 transition-colors">{item.name}</span>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-mono font-bold text-white group-hover:text-warm-amber transition-colors">{item.value}</span>
-                    <span className="text-xs text-zinc-600">{item.unit}</span>
+                    <span className="text-3xl font-display font-medium text-rui-dark group-hover:text-rui-pink transition-colors">{item.value}</span>
+                    <span className="text-xs text-rui-gray font-sans">{item.unit}</span>
                   </div>
                 </div>
               ))}
@@ -717,33 +796,33 @@ const ConfirmationModal = memo(({ show, title, message, onConfirm, onCancel }: {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+        className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-rui-dark/40 backdrop-blur-sm"
       >
         <motion.div 
-          initial={{ scale: 0.9, opacity: 0 }}
+          initial={{ scale: 0.95, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          exit={{ scale: 0.9, opacity: 0 }}
-          className="bg-zinc-900 border border-zinc-800 p-6 rounded-xl max-w-sm w-full shadow-2xl"
+          exit={{ scale: 0.95, opacity: 0 }}
+          className="bg-rui-white p-8 rounded-[24px] max-w-sm w-full shadow-2xl"
         >
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 rounded-full bg-warm-amber/10 text-warm-amber">
+            <div className="p-2 rounded-full bg-rui-warning/10 text-rui-warning">
               <AlertTriangle className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-white tracking-tight">{title}</h3>
+            <h3 className="text-xl font-display font-medium text-rui-dark tracking-tight">{title}</h3>
           </div>
-          <p className="text-sm text-zinc-400 mb-8 leading-relaxed">
+          <p className="text-[14px] text-rui-slate mb-8 leading-relaxed font-sans">
             {message}
           </p>
           <div className="flex gap-3">
             <button 
               onClick={onCancel}
-              className="flex-1 py-2 rounded-md bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-bold transition-colors"
+              className="btn-pill flex-1 px-4 py-2.5 bg-rui-surface text-rui-dark hover:bg-rui-divider/30"
             >
               取消
             </button>
             <button 
               onClick={onConfirm}
-              className="flex-1 py-2 rounded-md bg-primary-cyan hover:bg-primary-cyan/90 text-black text-xs font-bold transition-colors"
+              className="btn-pill flex-1 px-4 py-2.5 bg-rui-dark text-rui-white hover:bg-rui-dark/90"
             >
               确认执行
             </button>
@@ -763,36 +842,36 @@ const ImageCarouselModal = memo(({ show, currentSlide, onPrev, onNext, onClose }
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[110] bg-black/95 backdrop-blur-2xl flex items-center justify-center p-8"
+        className="fixed inset-0 z-[110] bg-rui-white/95 backdrop-blur-2xl flex items-center justify-center p-12"
       >
         <button 
           onClick={onClose}
-          className="absolute top-8 right-8 p-3 bg-zinc-900 border border-zinc-800 rounded-full hover:bg-zinc-800 transition-colors z-20"
+          className="absolute top-12 right-12 p-4 bg-rui-surface rounded-full hover:bg-rui-divider/30 transition-colors z-20"
         >
-          <Maximize2 className="w-6 h-6 text-zinc-400 rotate-45" />
+          <Maximize2 className="w-8 h-8 text-rui-slate rotate-45" />
         </button>
 
-        <div className="relative w-full max-w-6xl aspect-[16/10] flex items-center gap-6">
+        <div className="relative w-full max-w-6xl aspect-[16/10] flex items-center gap-10">
           {/* Prev Button */}
           <button 
             onClick={onPrev}
-            className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-all group"
+            className="p-6 bg-rui-surface rounded-[24px] hover:bg-rui-divider/30 transition-all group"
           >
-            <ChevronRight className="w-8 h-8 text-zinc-600 group-hover:text-primary-cyan rotate-180" />
+            <ChevronRight className="w-10 h-10 text-rui-slate group-hover:text-rui-blue rotate-180" />
           </button>
 
           {/* Slide Content (4-image grid) */}
-          <div className="flex-1 h-full bg-zinc-900/20 border border-zinc-800/50 rounded-2xl overflow-hidden p-4">
-            <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full">
+          <div className="flex-1 h-full bg-rui-surface rounded-[32px] overflow-hidden p-6">
+            <div className="grid grid-cols-2 grid-rows-2 gap-6 h-full">
               {GALLERY_DATA[currentSlide].images.map((src, idx) => (
-                <div key={idx} className="relative rounded-lg overflow-hidden border border-zinc-800 group aspect-video">
+                <div key={idx} className="relative rounded-[20px] overflow-hidden border border-rui-divider/20 group aspect-video">
                   <img 
                     src={src} 
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" 
                     referrerPolicy="no-referrer"
                     loading="lazy"
                   />
-                  <div className="absolute top-2 left-2 px-2 py-0.5 bg-black/60 rounded text-[10px] text-zinc-400 font-mono border border-white/5">
+                  <div className="absolute top-3 left-3 px-3 py-1 bg-rui-dark/80 rounded-full text-[10px] text-rui-white font-display font-medium uppercase tracking-wider">
                     VIEW_0{idx + 1}
                   </div>
                 </div>
@@ -803,21 +882,21 @@ const ImageCarouselModal = memo(({ show, currentSlide, onPrev, onNext, onClose }
           {/* Next Button */}
           <button 
             onClick={onNext}
-            className="p-4 bg-zinc-900/50 border border-zinc-800 rounded-xl hover:bg-zinc-800 transition-all group"
+            className="p-6 bg-rui-surface rounded-[24px] hover:bg-rui-divider/30 transition-all group"
           >
-            <ChevronRight className="w-8 h-8 text-zinc-600 group-hover:text-primary-cyan" />
+            <ChevronRight className="w-10 h-10 text-rui-slate group-hover:text-rui-blue" />
           </button>
 
           {/* Pagination Info */}
-          <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4">
-            <span className="text-xs font-mono text-zinc-500 tracking-widest uppercase">
+          <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 flex items-center gap-6">
+            <span className="text-[12px] font-display font-medium text-rui-slate tracking-widest uppercase">
               Batch {currentSlide + 1} / {GALLERY_DATA.length}
             </span>
-            <div className="flex gap-1.5">
+            <div className="flex gap-2">
               {GALLERY_DATA.map((_, idx) => (
                 <div 
                   key={idx} 
-                  className={`h-1 transition-all rounded-full ${idx === currentSlide ? 'w-8 bg-primary-cyan' : 'w-2 bg-zinc-800'}`} 
+                  className={`h-1.5 transition-all rounded-full ${idx === currentSlide ? 'w-12 bg-rui-blue' : 'w-3 bg-rui-divider'}`} 
                 />
               ))}
             </div>
@@ -830,76 +909,57 @@ const ImageCarouselModal = memo(({ show, currentSlide, onPrev, onNext, onClose }
 
 ImageCarouselModal.displayName = 'ImageCarouselModal';
 
-const GalleryDrawer = memo(({ 
-  show, 
-  onToggle, 
+const ImageSidebar = memo(({ 
   onImageClick 
 }: { 
-  show: boolean, 
-  onToggle: () => void, 
   onImageClick: (slideIdx: number) => void 
 }) => (
-  <div className="border-t border-zinc-900 bg-black/40 shrink-0 relative">
-    <button 
-      onClick={onToggle}
-      className="absolute -top-6 left-1/2 -translate-x-1/2 px-4 py-1 bg-zinc-900 border border-zinc-800 border-b-0 rounded-t-lg flex items-center gap-2 hover:bg-zinc-800 transition-colors z-10"
-    >
-      <ImageIcon className="w-3 h-3 text-primary-cyan" />
-      <span className="text-[8px] text-zinc-500 uppercase tracking-widest font-bold">历史抓拍库</span>
-      <ChevronRight className={`w-3 h-3 text-zinc-600 transition-transform ${show ? 'rotate-90' : '-rotate-90'}`} />
-    </button>
-
-    <AnimatePresence>
-      {show && (
-        <motion.div 
-          initial={{ height: 0, opacity: 0 }}
-          animate={{ height: 96, opacity: 1 }}
-          exit={{ height: 0, opacity: 0 }}
-          className="overflow-hidden"
-        >
-          <div className="h-24 p-3 flex gap-3 overflow-x-auto custom-scrollbar">
-            {GALLERY_DATA.map((slide, sIdx) => (
-              slide.images.map((img, iIdx) => (
-                <div 
-                  key={`${sIdx}-${iIdx}`} 
-                  onClick={() => onImageClick(sIdx)}
-                  className="flex-shrink-0 w-32 rounded border border-zinc-800 overflow-hidden relative group cursor-pointer"
-                >
-                  <img 
-                    src={img} 
-                    className="w-full h-full object-cover grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all" 
-                    referrerPolicy="no-referrer"
-                    loading="lazy"
-                  />
-                  <div className="absolute bottom-1 right-1 text-[7px] text-zinc-600">BATCH_{sIdx+1}_IMG_{iIdx+1}</div>
-                </div>
-              ))
-            ))}
+  <div className="w-48 border-l border-rui-divider/30 bg-rui-white flex flex-col shrink-0">
+    <div className="p-3 border-b border-rui-divider/10 bg-rui-surface/30">
+      <div className="flex items-center gap-2">
+        <ImageIcon className="w-3.5 h-3.5 text-rui-blue" />
+        <span className="text-[11px] text-rui-dark font-display font-medium uppercase tracking-wider">废钢抓拍图</span>
+      </div>
+    </div>
+    <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
+      {GALLERY_DATA.map((slide, sIdx) => (
+        slide.images.map((img, iIdx) => (
+          <div 
+            key={`${sIdx}-${iIdx}`} 
+            onClick={() => onImageClick(sIdx)}
+            className="w-full aspect-[4/3] rounded-[12px] border border-rui-divider/20 overflow-hidden relative group cursor-pointer shadow-sm hover:shadow-md transition-all"
+          >
+            <img 
+              src={img} 
+              className="w-full h-full object-cover grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all" 
+              referrerPolicy="no-referrer"
+              loading="lazy"
+            />
+            <div className="absolute bottom-1.5 right-1.5 text-[7px] text-rui-white font-display font-medium bg-rui-dark/60 px-1 rounded backdrop-blur-sm">
+              BATCH_{sIdx+1}
+            </div>
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        ))
+      ))}
+    </div>
   </div>
 ));
 
-GalleryDrawer.displayName = 'GalleryDrawer';
+ImageSidebar.displayName = 'ImageSidebar';
 
 const Footer = memo(() => (
-  <footer className="h-10 border-t border-zinc-900 px-6 flex items-center justify-between bg-black/40 relative overflow-hidden">
-    {/* Subtle bottom glow */}
-    <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary-blue/10 to-transparent" />
-    
+  <footer className="h-12 border-t border-rui-divider/30 px-8 flex items-center justify-between bg-rui-white relative">
     <div className="flex items-center gap-8 relative z-10">
       <div className="flex items-center gap-2 group cursor-help">
-        <div className="w-1.5 h-1.5 bg-primary-cyan rounded-full shadow-[0_0_8px_rgba(0,202,255,0.5)] animate-pulse" />
-        <span className="text-[9px] text-zinc-600 uppercase tracking-widest group-hover:text-zinc-400 transition-colors">马钢富圆金属资源有限公司利辛分公司</span>
+        <div className="w-2 h-2 bg-rui-blue rounded-full" />
+        <span className="text-[11px] text-rui-slate font-display font-medium uppercase tracking-wider group-hover:text-rui-dark transition-colors">马钢富圆金属资源有限公司利辛分公司</span>
       </div>
     </div>
-    <div className="flex items-center gap-6 text-[9px] text-zinc-700 uppercase tracking-tighter relative z-10">
-      <span className="hover:text-primary-blue transition-colors cursor-default">Engine: <span className="text-zinc-500">AI_GRADER_PRO_X</span></span>
-      <span className="hover:text-primary-cyan transition-colors cursor-default">Latency: <span className="text-zinc-500">0.04s</span></span>
-      <span className="flex items-center gap-1.5">
-        Status: <span className="text-primary-teal font-bold tracking-widest">Authorized</span>
+    <div className="flex items-center gap-8 text-[11px] text-rui-gray font-display font-medium uppercase tracking-wider relative z-10">
+      <span className="hover:text-rui-blue transition-colors cursor-default">Engine: <span className="text-rui-slate">AI_GRADER_PRO_X</span></span>
+      <span className="hover:text-rui-blue transition-colors cursor-default">Latency: <span className="text-rui-slate">0.04s</span></span>
+      <span className="flex items-center gap-2">
+        Status: <span className="text-rui-teal font-bold tracking-widest">Authorized</span>
       </span>
     </div>
   </footer>
@@ -908,23 +968,18 @@ const Footer = memo(() => (
 Footer.displayName = 'Footer';
 
 const BackgroundAccents = memo(() => (
-  <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden">
-    <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] bg-primary-deep/10 blur-[140px] rounded-full animate-pulse" />
-    <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] bg-primary-blue/10 blur-[140px] rounded-full animate-pulse" style={{ animationDelay: '2s' }} />
-    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60%] h-[60%] bg-primary-cyan/5 blur-[160px] rounded-full" />
-    <div className="absolute inset-0 opacity-[0.03] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] mix-blend-overlay" />
-    
-    {/* Subtle grid lines */}
-    <div className="absolute inset-0 opacity-[0.02]" style={{ backgroundImage: 'linear-gradient(to right, #ffffff 1px, transparent 1px), linear-gradient(to bottom, #ffffff 1px, transparent 1px)', backgroundSize: '100px 100px' }} />
+  <div className="fixed top-0 left-0 w-full h-full pointer-events-none -z-10 overflow-hidden bg-rui-white">
+    {/* Minimalist Revolut-style background - clean white with very subtle geometric hints */}
+    <div className="absolute top-[-20%] right-[-10%] w-[60%] h-[60%] bg-rui-blue/5 blur-[120px] rounded-full" />
+    <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-rui-pink/5 blur-[100px] rounded-full" />
   </div>
 ));
 
 BackgroundAccents.displayName = 'BackgroundAccents';
 
 export default function App() {
+  const [activePointId, setActivePointId] = useState('4');
   const [showDetails, setShowDetails] = useState(false);
-  const [showDeductionDetails, setShowDeductionDetails] = useState(false);
-  const [showGallery, setShowGallery] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [confirmModal, setConfirmModal] = useState<{
@@ -941,8 +996,6 @@ export default function App() {
 
   const handleShowDetails = useCallback(() => setShowDetails(true), []);
   const handleCloseDetails = useCallback(() => setShowDetails(false), []);
-  const handleToggleDeduction = useCallback(() => setShowDeductionDetails(prev => !prev), []);
-  const handleToggleGallery = useCallback(() => setShowGallery(prev => !prev), []);
   const handleOpenImageModal = useCallback((slideIdx: number) => {
     setCurrentSlide(slideIdx);
     setShowImageModal(true);
@@ -951,7 +1004,7 @@ export default function App() {
   const handlePrevSlide = useCallback(() => setCurrentSlide(prev => (prev > 0 ? prev - 1 : GALLERY_DATA.length - 1)), []);
   const handleNextSlide = useCallback(() => setCurrentSlide(prev => (prev < GALLERY_DATA.length - 1 ? prev + 1 : 0)), []);
 
-  const handleAction = useCallback((type: 'abnormal' | 'end') => {
+  const handleAction = useCallback((type: 'abnormal' | 'end' | 'leave') => {
     if (type === 'abnormal') {
       setConfirmModal({
         show: true,
@@ -962,13 +1015,23 @@ export default function App() {
           setConfirmModal(prev => ({ ...prev, show: false }));
         }
       });
-    } else {
+    } else if (type === 'end') {
       setConfirmModal({
         show: true,
         title: '确认结束判级',
         message: '是否确认结束当前车次的判级流程？结束后将生成最终判级报告，无法再次修改。',
         action: () => {
           console.log('Grading ended');
+          setConfirmModal(prev => ({ ...prev, show: false }));
+        }
+      });
+    } else if (type === 'leave') {
+      setConfirmModal({
+        show: true,
+        title: '确认中途离开',
+        message: '是否确认中途离开当前判级任务？系统将保存当前进度，您可以稍后继续。',
+        action: () => {
+          console.log('Left midway');
           setConfirmModal(prev => ({ ...prev, show: false }));
         }
       });
@@ -988,7 +1051,7 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen bg-[#080808] text-zinc-400 font-mono selection:bg-primary-cyan/30 overflow-hidden flex flex-col">
+    <div className="h-screen bg-rui-white text-rui-dark font-sans selection:bg-rui-blue/20 overflow-hidden flex flex-col">
       
       {/* Details Modal */}
       <DetailsModal show={showDetails} onClose={handleCloseDetails} />
@@ -1012,16 +1075,16 @@ export default function App() {
       />
 
       {/* 1. TOP BAR - System Title & Time */}
-      <TopBar />
+      <TopBar activePointId={activePointId} onPointSelect={setActivePointId} />
 
       {/* MAIN DASHBOARD */}
-      <main className="flex-1 grid grid-cols-12 gap-px bg-zinc-900/50 overflow-hidden">
+      <main className="flex-1 grid grid-cols-12 gap-px bg-rui-divider/20 overflow-hidden">
         
         {/* LEFT PANEL - Alarms & Info Stream */}
-        <div className="col-span-2 bg-[#080808] p-4 flex flex-col border-r border-zinc-900 min-h-0">
+        <div className="col-span-2 bg-rui-white p-3 flex flex-col border-r border-rui-divider/30 min-h-0">
           <div className="flex-[0.65] flex flex-col min-h-0 mb-4">
             <SectionHeader title="报警监测" icon={ShieldAlert} important />
-            <div className="flex-1 space-y-2 overflow-auto pr-2 custom-scrollbar">
+            <div className="flex-1 space-y-2 overflow-auto pr-1 custom-scrollbar">
               {sortedAlarms.map(item => (
                 <AlarmItemCard key={item.id} item={item} />
               ))}
@@ -1029,18 +1092,18 @@ export default function App() {
           </div>
 
           {/* Moved Info Stream here */}
-          <div className="flex-[0.35] pt-4 border-t border-zinc-900 min-h-0 flex flex-col">
+          <div className="flex-[0.35] pt-4 border-t border-rui-divider/30 min-h-0 flex flex-col">
             <SectionHeader 
               title="实时信息流" 
               icon={Info} 
               badge={
-                <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-warm-red/20 border border-warm-red/30">
-                  <div className="w-1 h-1 rounded-full bg-warm-red animate-ping" />
-                  <span className="text-[7px] font-bold text-warm-red uppercase tracking-tighter">有退货提醒 1条</span>
+                <div className="flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-rui-danger/10 border border-rui-danger/20">
+                  <div className="w-1 h-1 rounded-full bg-rui-danger animate-pulse" />
+                  <span className="text-[9px] font-display font-medium text-rui-danger uppercase tracking-wider">退货提醒</span>
                 </div>
               }
             />
-            <div className="flex-1 space-y-1.5 overflow-auto pr-2 custom-scrollbar">
+            <div className="flex-1 space-y-1.5 overflow-auto pr-1 custom-scrollbar">
               <PinnedAlert content="触发“扣杂量超标”退货提醒" />
               {PROMPT_MESSAGES.map(msg => (
                 <InfoStreamItem key={msg.id} msg={msg} />
@@ -1050,35 +1113,37 @@ export default function App() {
         </div>
 
         {/* CENTER PANEL - Video & Hero Results (Important) */}
-        <div className="col-span-7 bg-[#080808] flex flex-col min-h-0">
+        <div className="col-span-7 bg-rui-surface flex flex-col min-h-0">
           
           {/* 7. Comprehensive Results (Hero) */}
-          <ComprehensiveResults 
-            showDeductionDetails={showDeductionDetails} 
-            onToggleDeduction={handleToggleDeduction} 
-            onAction={handleAction}
-          />
+          <ComprehensiveResults onAction={handleAction} />
 
-          {/* 4. Video Feeds */}
-          <div className="flex-1 p-4 grid grid-rows-2 gap-4 min-h-0 overflow-hidden">
-            <VideoFeed id="01" title="枪机画面" icon={Scan} src="./枪机画面.jpg" />
-            <VideoFeed id="02" title="球机画面" icon={Activity} src="./球机画面.jpg" />
+          {/* 4. Video Feeds & Image Sidebar - Side by side */}
+          <div className="flex-1 flex min-h-0 overflow-hidden">
+            {/* Video Feeds Container */}
+            <div className="flex-1 p-3 flex flex-col gap-3 overflow-hidden">
+              <VideoFeed id="01" title="枪机画面" icon={Scan} src="./枪机画面.png" />
+              <VideoFeed id="02" title="球机画面" icon={Activity} src="./球机画面.png" />
+            </div>
+
+            {/* 6. Scrap Images Sidebar */}
+            <ImageSidebar 
+              onImageClick={handleOpenImageModal} 
+            />
           </div>
-
-          {/* 6. Scrap Images (Drawer Style) */}
-          <GalleryDrawer 
-            show={showGallery} 
-            onToggle={handleToggleGallery} 
-            onImageClick={handleOpenImageModal} 
-          />
         </div>
 
         {/* RIGHT PANEL - Grading Analysis (Important) */}
-        <AnalysisPanel onShowDetails={handleShowDetails} />
+        <AnalysisPanel onShowDetails={handleShowDetails} onAction={handleAction} />
       </main>
 
-      {/* FOOTER - System Status */}
-      <Footer />
+      {/* Floating Quick Config Icon */}
+      <button className="fixed bottom-24 right-8 w-14 h-14 rounded-full bg-rui-blue text-white shadow-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-[80] group">
+        <Settings className="w-7 h-7 group-hover:rotate-90 transition-transform duration-500" />
+        <div className="absolute right-full mr-4 px-3 py-1.5 rounded-lg bg-rui-dark text-white text-xs font-display font-medium whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+          快速配置
+        </div>
+      </button>
 
       {/* Background Accents */}
       <BackgroundAccents />
