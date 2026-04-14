@@ -1,8 +1,9 @@
 import { memo } from 'react';
-import { AlertTriangle, BarChart3, ChevronRight, Maximize2, Package, ShieldAlert } from 'lucide-react';
+import { AlertTriangle, BarChart3, ChevronRight, Maximize2, Package } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-import { DEDUCTION_DATA, GALLERY_DATA, MATERIAL_DATA, THICKNESS_DATA } from '../dashboard/constants';
+import { GALLERY_DATA, MATERIAL_DATA, THICKNESS_DATA } from '../dashboard/constants';
+import type { DetailModalType } from '../dashboard/types';
 
 interface ConfirmModalState {
   show: boolean;
@@ -11,9 +12,16 @@ interface ConfirmModalState {
   action: () => void;
 }
 
-const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => void }) => (
+const DetailsModal = memo(
+  ({
+    detailType,
+    onClose,
+  }: {
+    detailType: DetailModalType | null;
+    onClose: () => void;
+  }) => (
   <AnimatePresence>
-    {show && (
+    {detailType && (
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -25,7 +33,7 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => vo
             <div className="flex items-center gap-4">
               <div className="w-1 h-10 bg-rui-blue rounded-full" />
               <h2 className="text-4xl font-display font-medium text-rui-dark tracking-[-0.04em]">
-                判级深度分析详情
+                {detailType === 'thickness' ? '厚度占比详情' : '料型占比详情'}
               </h2>
             </div>
             <button
@@ -36,7 +44,7 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => vo
             </button>
           </div>
 
-          <div className="grid grid-cols-2 gap-8">
+          {detailType === 'thickness' ? (
             <div className="bg-rui-surface p-8 rounded-[20px] border border-rui-divider/60">
               <div className="flex items-center gap-3 mb-8">
                 <BarChart3 className="w-5 h-5 text-rui-blue" />
@@ -47,12 +55,12 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => vo
               <div className="space-y-8">
                 {THICKNESS_DATA.map((item) => (
                   <div key={item.name} className="space-y-3">
-                    <div className="flex justify-between items-end">
-                      <div className="flex items-center gap-3">
+                    <div className="flex justify-between items-end gap-6">
+                      <div className="flex flex-1 items-center gap-3">
                         <div className="px-3 py-1 rounded-[9999px] bg-rui-surface-strong text-xs font-display font-medium text-rui-dark border border-rui-divider/60">
                           {item.name}
                         </div>
-                        <div className="h-1.5 w-48 bg-rui-divider/25 rounded-full overflow-hidden">
+                        <div className="h-1.5 flex-1 bg-rui-divider/25 rounded-full overflow-hidden">
                           <div
                             className="h-full rounded-full"
                             style={{ width: `${item.value}%`, backgroundColor: item.color }}
@@ -79,7 +87,7 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => vo
                 ))}
               </div>
             </div>
-
+          ) : (
             <div className="bg-rui-surface p-8 rounded-[20px] border border-rui-divider/60">
               <div className="flex items-center gap-3 mb-8">
                 <Package className="w-5 h-5 text-rui-blue" />
@@ -93,6 +101,10 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => vo
                     key={item.name}
                     className="flex items-center gap-3 bg-rui-surface-strong p-3 rounded-[20px] border border-rui-divider/60"
                   >
+                    <div
+                      className="h-10 w-1.5 rounded-full shrink-0"
+                      style={{ backgroundColor: item.color }}
+                    />
                     <div className="flex-1">
                       <div className="flex justify-between mb-1.5">
                         <span className="text-xs font-display font-medium text-rui-dark">
@@ -103,41 +115,17 @@ const DetailsModal = memo(({ show, onClose }: { show: boolean; onClose: () => vo
                         </span>
                       </div>
                       <div className="h-1 w-full bg-rui-divider/20 rounded-full overflow-hidden">
-                        <div className="h-full bg-rui-blue/60" style={{ width: `${item.value}%` }} />
+                        <div
+                          className="h-full"
+                          style={{ width: `${item.value}%`, backgroundColor: item.color }}
+                        />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             </div>
-          </div>
-
-          <div className="mt-8 bg-rui-surface p-8 rounded-[20px] border border-rui-divider/60">
-            <div className="flex items-center gap-3 mb-8">
-              <ShieldAlert className="w-5 h-5 text-rui-danger" />
-              <span className="text-lg font-display font-medium text-rui-dark uppercase tracking-wider">
-                扣杂详情分析
-              </span>
-            </div>
-            <div className="grid grid-cols-6 gap-6">
-              {DEDUCTION_DATA.map((item) => (
-                <div
-                  key={item.name}
-                  className="flex flex-col items-center p-6 bg-rui-surface-strong rounded-[20px] border border-rui-divider/60 hover:border-rui-danger/30 transition-colors group"
-                >
-                  <span className="text-[11px] text-rui-slate font-display font-medium uppercase tracking-wider mb-3 group-hover:text-rui-danger/70 transition-colors">
-                    {item.name}
-                  </span>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-3xl font-display font-medium text-rui-dark group-hover:text-rui-danger transition-colors">
-                      {item.value}
-                    </span>
-                    <span className="text-xs text-rui-gray font-sans">{item.unit}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+          )}
         </div>
       </motion.div>
     )}
@@ -292,7 +280,7 @@ const ImageCarouselModal = memo(
 ImageCarouselModal.displayName = 'ImageCarouselModal';
 
 interface ModalLayerProps {
-  showDetails: boolean;
+  detailType: DetailModalType | null;
   onCloseDetails: () => void;
   showImageModal: boolean;
   currentSlide: number;
@@ -305,7 +293,7 @@ interface ModalLayerProps {
 
 export const ModalLayer = memo(
   ({
-    showDetails,
+    detailType,
     onCloseDetails,
     showImageModal,
     currentSlide,
@@ -316,7 +304,7 @@ export const ModalLayer = memo(
     onCancelConfirm,
   }: ModalLayerProps) => (
     <>
-      <DetailsModal show={showDetails} onClose={onCloseDetails} />
+      <DetailsModal detailType={detailType} onClose={onCloseDetails} />
       <ImageCarouselModal
         show={showImageModal}
         currentSlide={currentSlide}

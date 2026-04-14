@@ -5,7 +5,14 @@ import { Cell, Pie, PieChart, ResponsiveContainer } from 'recharts';
 import { BASIC_INFO, MATERIAL_DATA, THICKNESS_DATA } from '../dashboard/constants';
 import { SectionHeader } from '../dashboard/common';
 
-const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) => (
+const AnalysisPanel = memo(
+  ({
+    onShowThicknessDetails,
+    onShowMaterialDetails,
+  }: {
+    onShowThicknessDetails: () => void;
+    onShowMaterialDetails: () => void;
+  }) => (
   <div className="col-span-3 bg-rui-surface p-3 flex flex-col border-l border-rui-divider/60 min-h-0 overflow-y-auto custom-scrollbar">
     <div className="mb-6">
       <SectionHeader title="基础判级信息" icon={Info} />
@@ -85,7 +92,7 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
 
     <div className="flex-1 min-h-0 space-y-6">
       <div className="bg-rui-surface-strong p-4 rounded-[20px] border border-rui-divider/60">
-        <SectionHeader title="厚度占比" icon={Activity} onMore={onShowDetails} />
+        <SectionHeader title="厚度占比" icon={Activity} onMore={onShowThicknessDetails} />
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 relative shrink-0">
             <ResponsiveContainer width="100%" height="100%">
@@ -128,7 +135,7 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
       </div>
 
       <div className="bg-rui-surface-strong p-4 rounded-[20px] border border-rui-divider/60">
-        <SectionHeader title="料型占比" icon={LayoutGrid} onMore={() => {}} />
+        <SectionHeader title="料型占比" icon={LayoutGrid} onMore={onShowMaterialDetails} />
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 relative shrink-0">
             <ResponsiveContainer width="100%" height="100%">
@@ -175,8 +182,19 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
 
 AnalysisPanel.displayName = 'AnalysisPanel';
 
-export const RightAnalysisRegion = memo(({ onShowDetails }: { onShowDetails: () => void }) => (
-  <AnalysisPanel onShowDetails={onShowDetails} />
-));
+export const RightAnalysisRegion = memo(
+  ({
+    onShowThicknessDetails,
+    onShowMaterialDetails,
+  }: {
+    onShowThicknessDetails: () => void;
+    onShowMaterialDetails: () => void;
+  }) => (
+    <AnalysisPanel
+      onShowThicknessDetails={onShowThicknessDetails}
+      onShowMaterialDetails={onShowMaterialDetails}
+    />
+  ),
+);
 
 RightAnalysisRegion.displayName = 'RightAnalysisRegion';

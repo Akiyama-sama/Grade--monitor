@@ -160,24 +160,29 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
 
         <section className="min-w-0 border-t border-rui-divider/40 pt-3 xl:border-t-0 xl:pl-5 xl:pt-0">
           <div className="relative h-full min-h-[135px] overflow-hidden">
-            <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="translate-x-7 text-[clamp(4rem,7vw,6rem)] font-display font-medium leading-none tracking-[-0.08em] text-rui-pink/15">
-                {DEDUCTION_TOTAL.value}
-                <span className="ml-1 align-top text-[0.24em] tracking-[0.22em] text-rui-pink/30">
-                  {DEDUCTION_TOTAL.unit.toUpperCase()}
-                </span>
+            <div className="pointer-events-none absolute right-0 top-0 z-0">
+              <div className="flex flex-col items-end gap-1">
+                <div className="text-[9px] font-display font-medium uppercase tracking-[0.2em] text-rui-gray/80">
+                  扣杂总量
+                </div>
+                <div className="relative inline-block pr-4 text-[clamp(2rem,2.3vw,2.4rem)] font-display font-medium leading-none tracking-[-0.08em] text-rui-pink/80">
+                  {DEDUCTION_TOTAL.value}
+                  <span className="absolute bottom-[0.08em] right-0 text-[0.18em] tracking-[0.2em] text-rui-pink/58">
+                    {DEDUCTION_TOTAL.unit.toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
 
-            <div className="relative z-10 flex h-full flex-col">
+            <div className="relative z-10 flex h-full flex-col pr-14">
               <div className="text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-gray">
                 智能扣杂
               </div>
 
               <div className="mt-0.5 flex flex-1 items-center justify-center">
-                <div className="h-[110px] w-full max-w-[180px]">
+                <div className="h-[130px] w-full max-w-[188px]">
                   <ResponsiveContainer width="100%" height="100%">
-                    <RadarChart cx="50%" cy="54%" outerRadius="66%" data={DEDUCTION_DATA}>
+                    <RadarChart cx="50%" cy="54%" outerRadius="75%" data={DEDUCTION_DATA}>
                       <PolarGrid stroke={CHART_COLORS.divider} />
                       <PolarAngleAxis dataKey="name" tick={{ fill: CHART_COLORS.gray, fontSize: 9 }} />
                       <Radar
