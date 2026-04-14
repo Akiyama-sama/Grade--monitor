@@ -29,83 +29,82 @@ const LEVEL_DISTRIBUTION = [
   { label: '重2', value: 70, accent: true },
 ] as const;
 
+const LEVEL_TREEMAP_DATA = [
+  { name: '重1', size: 20, fill: CHART_COLORS.brown, valueLabel: '20%' },
+  { name: '重2', size: 70, fill: CHART_COLORS.blue, valueLabel: '70%' },
+] as const;
+
 const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveResultsProps) => {
   const activePoint = MONITORING_POINTS.find((point) => point.id === activePointId);
 
   return (
     <div className="px-6 py-3 border-b border-rui-divider/60 bg-rui-surface shrink-0">
-      <div className="grid gap-0 xl:grid-cols-[minmax(0,1.28fr)_minmax(240px,0.72fr)] xl:items-stretch">
+      <div className="grid gap-0 xl:grid-cols-[minmax(0,1.28fr)_minmax(240px,0.72fr)] ">
         <section className="min-w-0 xl:border-r xl:border-rui-divider/45 xl:pr-5">
           <div className="flex h-full flex-col">
-            <div className="pb-3">
-              <div className="grid gap-4 xl:grid-cols-[minmax(260px,0.86fr)_minmax(0,1.04fr)] xl:items-stretch">
+            <div>
+              <div className="grid gap-4 xl:grid-cols-[minmax(270px,1fr)_minmax(200px,0.5fr)] xl:items-stretch">
                 <div className="min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <div className="text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-gray">
-                      判级状态
-                    </div>
+                  
+                  <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px] md:items-end">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
+                        <div className="flex flex-wrap items-center gap-2">
+                    
                     <span className="rounded-[9999px] border border-rui-divider/60 bg-rui-surface px-2.5 py-0.5 text-[10px] font-display font-medium uppercase tracking-[0.18em] text-rui-slate">
                       {activePoint?.name ?? '当前监控点'}
                     </span>
-                    {activePoint?.status === 'warning' && (
-                      <span className="rounded-[9999px] border border-rui-warning/20 bg-rui-warning/10 px-2.5 py-0.5 text-[10px] font-display font-medium uppercase tracking-[0.18em] text-rui-warning">
-                        待复核
-                      </span>
-                    )}
+                    
                   </div>
-                  <div className="mt-3 flex flex-wrap items-end gap-x-3 gap-y-2">
-                    <h2 className="text-[clamp(2.45rem,3.2vw,3.95rem)] font-display font-medium leading-none tracking-[-0.065em] text-rui-dark">
-                      判级中
-                    </h2>
-                    <div className="pb-1 text-[13px] font-display font-medium tracking-[0.08em] text-rui-blue">
-                      {BASIC_INFO.plateNumber}
+                        <h2 className="text-[clamp(2.45rem,3.2vw,3.95rem)] font-display font-medium leading-none tracking-[-0.065em] text-rui-dark">
+                          判级中
+                        </h2>
+                        <div className="pb-1 text-[13px] font-display font-medium tracking-[0.08em] text-rui-blue">
+                          {BASIC_INFO.plateNumber}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="min-w-0 border-l border-rui-divider/45 pl-4">
+                      <div className="text-[10px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
+                        综合厚度
+                      </div>
+                      <div className="mt-2">
+                        <span className="text-[clamp(2.6rem,3vw,3.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-warning">
+                          6
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
 
                 <div className="min-w-0">
                   <div className="flex h-full flex-col justify-between">
-                    <div className="flex items-center justify-between gap-4">
-                      <div className="text-[12px] font-display font-medium tracking-[0.08em] text-rui-slate">
-                        综合厚度 + 智能级别
-                      </div>
-                      <div className="whitespace-nowrap text-[11px] font-display font-medium uppercase tracking-[0.14em] text-rui-blue">
-                        系统建议
-                      </div>
-                    </div>
+                    
 
-                    <div className="mt-3 grid flex-1 gap-4 md:grid-cols-[118px_minmax(0,1fr)] md:items-stretch">
-                      <div className="min-w-0 md:border-r md:border-rui-divider/45 md:pr-5">
-                        <div className="text-[10px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
-                          综合厚度
-                        </div>
-                        <div className="mt-3 flex h-[calc(100%-1.25rem)] items-center">
-                          <span className="text-[clamp(2.6rem,3vw,3.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-warning">
-                            6
-                          </span>
-                        </div>
-                      </div>
-                      <div className="min-w-0">
-                        <div className="text-[10px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
-                          智能级别
-                        </div>
-                        <div className="mt-3 flex h-[calc(100%-1.25rem)] flex-col justify-between">
-                          {LEVEL_DISTRIBUTION.map((item) => (
-                            <div key={item.label} className="space-y-1.5">
-                              <div className="flex items-center justify-between text-[11px] font-display font-medium uppercase tracking-[0.16em]">
-                                <span className={item.accent ? 'text-rui-blue' : 'text-rui-slate'}>{item.label}</span>
-                                <span className={item.accent ? 'text-rui-blue' : 'text-rui-dark'}>{item.value}%</span>
-                              </div>
-                              <div className={`overflow-hidden rounded-full bg-rui-divider/35 ${item.accent ? 'h-3' : 'h-2.5'}`}>
-                                <div
-                                  className={`h-full rounded-full ${item.accent ? 'bg-rui-blue' : 'bg-rui-divider-strong'}`}
-                                  style={{ width: `${item.value}%` }}
-                                />
-                              </div>
+                    <div className="flex h-[110px] gap-2.5 overflow-hidden rounded-[18px] border border-rui-divider/45 bg-rui-surface/65 p-2">
+                      {LEVEL_TREEMAP_DATA.map((item) => (
+                        <div
+                          key={item.name}
+                          className="relative flex min-w-0 flex-col justify-between overflow-hidden rounded-[14px] p-3"
+                          style={{
+                            flex: item.size,
+                            backgroundColor: item.fill,
+                          }}
+                        >
+                          <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.06)_0%,rgba(17,20,24,0.08)_100%)]" />
+                          <div className="relative z-10 text-[11px] font-display font-medium tracking-[0.08em] text-rui-dark">
+                            {item.name}
+                          </div>
+                          <div className="relative z-10 flex items-end justify-between gap-2">
+                            <div className="text-[1.45rem] font-display font-medium leading-none tracking-[-0.05em] text-rui-dark">
+                              {item.valueLabel}
                             </div>
-                          ))}
+                            <div className="text-[10px] font-display font-medium uppercase tracking-[0.16em] text-rui-dark/75">
+                              等级
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -149,9 +148,9 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
         <section className="min-w-0 border-t border-rui-divider/40 pt-3 xl:border-t-0 xl:pl-5 xl:pt-0">
           <div className="relative h-full min-h-[170px] overflow-hidden">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-              <div className="translate-x-7 text-[clamp(3.5rem,5.2vw,5.1rem)] font-display font-medium leading-none tracking-[-0.08em] text-rui-pink/5">
+              <div className="translate-x-7 text-[clamp(4rem,7vw,6rem)] font-display font-medium leading-none tracking-[-0.08em] text-rui-pink/15">
                 {DEDUCTION_TOTAL.value}
-                <span className="ml-1 align-top text-[0.24em] tracking-[0.22em] text-rui-pink/12">
+                <span className="ml-1 align-top text-[0.24em] tracking-[0.22em] text-rui-pink/30">
                   {DEDUCTION_TOTAL.unit.toUpperCase()}
                 </span>
               </div>
@@ -163,7 +162,7 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
               </div>
 
               <div className="mt-0.5 flex flex-1 items-center justify-center">
-                <div className="h-[126px] w-full max-w-[208px]">
+                <div className="h-[160px] w-full max-w-[208px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="54%" outerRadius="66%" data={DEDUCTION_DATA}>
                       <PolarGrid stroke={CHART_COLORS.divider} />
@@ -190,7 +189,7 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
 ComprehensiveResults.displayName = 'ComprehensiveResults';
 
 const ImageSidebar = memo(({ onImageClick }: { onImageClick: (slideIdx: number) => void }) => (
-  <div className="w-48 border-l border-rui-divider/60 bg-rui-surface flex flex-col shrink-0">
+  <div className="w-64 border-l border-rui-divider/60 bg-rui-surface flex flex-col shrink-0">
     <div className="p-3 border-b border-rui-divider/50 bg-rui-surface-strong">
       <div className="flex items-center gap-2">
         <ImageIcon className="w-3.5 h-3.5 text-rui-blue" />

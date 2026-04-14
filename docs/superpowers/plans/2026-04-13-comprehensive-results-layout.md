@@ -2,9 +2,9 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Re-layout the dashboard's top-center comprehensive results area into one line-divided container with a left results-and-buttons zone and a tighter right radar zone.
+**Goal:** Re-layout the dashboard's top-center comprehensive results area into one line-divided container with an integrated status-plus-thickness block, a treemap-style level display, and a tighter right radar zone.
 
-**Architecture:** Keep the redesign scoped to `src/components/regions/CenterDashboardRegion.tsx` by removing the current card-style wrappers from `ComprehensiveResults` and rebuilding it as a single horizontally split box. The left side will contain an upper summary row and a lower button row separated by a line, while the right side will hold a tighter radar area with `146kg` preserved as a low-priority visual element. Verify the result with TypeScript, production build, and Playwright at 1920x1080.
+**Architecture:** Keep the redesign scoped to `src/components/regions/CenterDashboardRegion.tsx` by removing the current card-style wrappers from `ComprehensiveResults` and rebuilding it as a single horizontally split box. The left side contains an upper summary row where the thickness value is integrated into the status block and the level distribution is shown as a treemap-style rectangle composition using colors allowed by `DESIGN.md`; the lower button row remains separated by a line. The right side holds a tighter radar area with `146kg` preserved as a low-priority visual element. Verify the result with TypeScript, production build, and Playwright at 1920x1080.
 
 **Tech Stack:** React 19, TypeScript, Vite, Tailwind CSS 4, Recharts, Playwright CLI
 
@@ -60,7 +60,7 @@ Keep:
 
 - current point badge and warning badge
 - plate number
-- `智能综合厚度` value `6`
+- `智能综合厚度` value `6`, but integrate it into the status block
 - `重1 20%` / `重2 70%`
 
 - [x] **Step 3: Move the three buttons into the left lower row**
@@ -75,7 +75,18 @@ Use a flat row separated by a top border:
 
 The button row must stay inside the left zone so the combined height of left summary + buttons visually matches the right radar section.
 
-- [x] **Step 4: Rebuild the right radar section as a tighter flat area**
+- [x] **Step 4: Replace the level bars with a treemap-style rectangle composition**
+
+Implement the level distribution as a treemap-style rectangle block instead of progress bars.
+
+Requirements:
+
+- use only colors allowed by `DESIGN.md`
+- dominant level should occupy more area
+- labels and percentages must remain readable inside the rectangles
+- the block should fill the available upper-middle space more effectively than the old bars
+
+- [x] **Step 5: Rebuild the right radar section as a tighter flat area**
 
 Replace the current radar card with a flatter section that uses only spacing and dividing lines.
 
@@ -98,7 +109,7 @@ Suggested structure:
 </section>
 ```
 
-- [x] **Step 5: Preserve `146kg` as a low-priority visual element**
+- [x] **Step 6: Preserve `146kg` as a low-priority visual element**
 
 Keep `146kg`, but change it from a foreground summary card to one of these low-priority treatments:
 
@@ -108,7 +119,7 @@ Keep `146kg`, but change it from a foreground summary card to one of these low-p
 
 or an equally unobtrusive alternative in the same spirit.
 
-- [x] **Step 6: Keep the chart compact and label-led**
+- [x] **Step 7: Keep the chart compact and label-led**
 
 Adjust the radar chart props to emphasize the chart itself:
 
@@ -125,7 +136,7 @@ Adjust the radar chart props to emphasize the chart itself:
 
 Keep only the angle labels around the chart. Do not render any extra explanatory paragraphs alongside it.
 
-- [x] **Step 7: Run type-check after the layout refactor**
+- [x] **Step 8: Run type-check after the layout refactor**
 
 Run:
 
@@ -199,7 +210,7 @@ Update this plan file so completed steps are checked off.
 
 ## Self-Review
 
-- Spec coverage: the plan covers the approved flat split layout, left upper summary, left lower buttons, tighter radar area, preserved but unobtrusive `146kg`, and Playwright self-check.
+- Spec coverage: the plan covers the approved flat split layout, integrated thickness in the status block, treemap-style level display using allowed colors, tighter radar area, preserved but unobtrusive `146kg`, and Playwright self-check.
 - Placeholder scan: no `TODO`/`TBD` placeholders remain.
 - Type consistency: the plan only modifies `ComprehensiveResults` in `CenterDashboardRegion.tsx` and keeps existing callback/data contracts intact.
 
