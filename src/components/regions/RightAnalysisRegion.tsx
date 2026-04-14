@@ -29,7 +29,7 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
           </div>
         </div>
 
-        <div className="flex flex-col pt-3 border-t border-rui-divider/50">
+        <div className="flex flex-col pt-1 border-t border-rui-divider/50">
           <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">
             供货方
           </span>
@@ -38,7 +38,7 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
           </span>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 pt-3 border-t border-rui-divider/50">
+        <div className="grid grid-cols-2 gap-4 pt-1 border-t border-rui-divider/50">
           <div className="flex flex-col">
             <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">
               毛重
@@ -59,12 +59,33 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
             </span>
           </div>
         </div>
+        <div className="flex gap-4 pt-1 border-t border-rui-divider/50">
+          <div className="flex flex-col">
+            <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">
+              刷卡时间
+            </span>
+            <div className="flex items-baseline gap-1">
+              <span className="text-xl font-display font-medium text-rui-warning">
+                2026-02-10 09:12:34
+              </span>
+              {/* <span className="text-[10px] text-rui-warning font-display font-medium">t</span> */}
+            </div>
+          </div>
+          <div className="flex-1 flex flex-col">
+            <span className="text-[10px] text-rui-gray font-display uppercase tracking-wider mb-0.5">
+              记过时间
+            </span>
+            <span className="text-[13px] text-rui-dark font-display font-medium tabular-nums">
+              3 min
+            </span>
+          </div>
+        </div>
       </div>
     </div>
 
     <div className="flex-1 min-h-0 space-y-6">
       <div className="bg-rui-surface-strong p-4 rounded-[20px] border border-rui-divider/60">
-        <SectionHeader title="智能厚度占比" icon={Activity} onMore={onShowDetails} />
+        <SectionHeader title="厚度占比" icon={Activity} onMore={onShowDetails} />
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 relative shrink-0">
             <ResponsiveContainer width="100%" height="100%">
@@ -107,7 +128,7 @@ const AnalysisPanel = memo(({ onShowDetails }: { onShowDetails: () => void }) =>
       </div>
 
       <div className="bg-rui-surface-strong p-4 rounded-[20px] border border-rui-divider/60">
-        <SectionHeader title="智能料型占比" icon={LayoutGrid} onMore={() => {}} />
+        <SectionHeader title="料型占比" icon={LayoutGrid} onMore={() => {}} />
         <div className="flex items-center gap-6">
           <div className="w-24 h-24 relative shrink-0">
             <ResponsiveContainer width="100%" height="100%">

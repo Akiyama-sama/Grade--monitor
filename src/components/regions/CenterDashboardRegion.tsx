@@ -31,7 +31,8 @@ const LEVEL_DISTRIBUTION = [
 
 const LEVEL_TREEMAP_DATA = [
   { name: '重1', size: 20, fill: CHART_COLORS.brown, valueLabel: '20%' },
-  { name: '重2', size: 70, fill: CHART_COLORS.blue, valueLabel: '70%' },
+  { name: '重2', size: 40, fill: CHART_COLORS.blue, valueLabel: '40%' },
+  { name: '重3', size: 30, fill: CHART_COLORS.green, valueLabel: '30%' },
 ] as const;
 
 const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveResultsProps) => {
@@ -39,39 +40,51 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
 
   return (
     <div className="px-6 py-3 border-b border-rui-divider/60 bg-rui-surface shrink-0">
-      <div className="grid gap-0 xl:grid-cols-[minmax(0,1.28fr)_minmax(240px,0.72fr)] ">
+      <div className="grid gap-0 xl:grid-cols-[minmax(0,1.28fr)_minmax(180px,0.6fr)] ">
         <section className="min-w-0 xl:border-r xl:border-rui-divider/45 xl:pr-5">
           <div className="flex h-full flex-col">
             <div>
-              <div className="grid gap-4 xl:grid-cols-[minmax(270px,1fr)_minmax(200px,0.5fr)] xl:items-stretch">
+              <div className="grid gap-4 grid-cols-[minmax(0px,1fr)_minmax(250px,0.5fr)] xl:items-stretch">
                 <div className="min-w-0">
                   
-                  <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_120px] md:items-end">
+                  <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_60px] md:items-center">
                     <div className="min-w-0">
-                      <div className="flex flex-wrap items-end gap-x-3 gap-y-2">
+                      <div className="flex flex-wrap items-start gap-x-3 gap-y-2">
                         <div className="flex flex-wrap items-center gap-2">
                     
                     <span className="rounded-[9999px] border border-rui-divider/60 bg-rui-surface px-2.5 py-0.5 text-[10px] font-display font-medium uppercase tracking-[0.18em] text-rui-slate">
                       {activePoint?.name ?? '当前监控点'}
                     </span>
-                    
-                  </div>
+                    <div className="pb-1 text-[13px] font-display font-medium tracking-[0.08em] text-rui-blue">
+                          {BASIC_INFO.plateNumber}
+                        </div>
+                    </div>
                         <h2 className="text-[clamp(2.45rem,3.2vw,3.95rem)] font-display font-medium leading-none tracking-[-0.065em] text-rui-dark">
                           判级中
                         </h2>
-                        <div className="pb-1 text-[13px] font-display font-medium tracking-[0.08em] text-rui-blue">
-                          {BASIC_INFO.plateNumber}
-                        </div>
+                        
                       </div>
                     </div>
-                    <div className="min-w-0 border-l border-rui-divider/45 pl-4">
-                      <div className="text-[10px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
+                    <div className="min-w-0 border-l border-rui-divider/45 flex flex-col">
+                      <div className=''>
+                        <div className="text-[8px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
                         综合厚度
                       </div>
-                      <div className="mt-2">
-                        <span className="text-[clamp(2.6rem,3vw,3.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-warning">
+                      <div className="">
+                        <span className="text-[clamp(2rem,2.2vw,2.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-warning">
                           6
                         </span>
+                      </div>
+                      </div>
+                      <div className=''>
+                        <div className="text-[8px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
+                        出水率
+                      </div>
+                      <div className="">
+                        <span className="text-[clamp(2rem,2.2vw,2.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-blue">
+                          0.7
+                        </span>
+                      </div>
                       </div>
                     </div>
                   </div>
@@ -81,7 +94,7 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
                   <div className="flex h-full flex-col justify-between">
                     
 
-                    <div className="flex h-[110px] gap-2.5 overflow-hidden rounded-[18px] border border-rui-divider/45 bg-rui-surface/65 p-2">
+                    <div className="flex h-[95px] gap-1 overflow-hidden rounded-[9px] border border-rui-divider/45 bg-rui-surface/65 ">
                       {LEVEL_TREEMAP_DATA.map((item) => (
                         <div
                           key={item.name}
@@ -146,7 +159,7 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
         </section>
 
         <section className="min-w-0 border-t border-rui-divider/40 pt-3 xl:border-t-0 xl:pl-5 xl:pt-0">
-          <div className="relative h-full min-h-[170px] overflow-hidden">
+          <div className="relative h-full min-h-[135px] overflow-hidden">
             <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
               <div className="translate-x-7 text-[clamp(4rem,7vw,6rem)] font-display font-medium leading-none tracking-[-0.08em] text-rui-pink/15">
                 {DEDUCTION_TOTAL.value}
@@ -158,11 +171,11 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
 
             <div className="relative z-10 flex h-full flex-col">
               <div className="text-[10px] font-display font-medium uppercase tracking-[0.24em] text-rui-gray">
-                智能扣杂雷达
+                智能扣杂
               </div>
 
               <div className="mt-0.5 flex flex-1 items-center justify-center">
-                <div className="h-[160px] w-full max-w-[208px]">
+                <div className="h-[110px] w-full max-w-[180px]">
                   <ResponsiveContainer width="100%" height="100%">
                     <RadarChart cx="50%" cy="54%" outerRadius="66%" data={DEDUCTION_DATA}>
                       <PolarGrid stroke={CHART_COLORS.divider} />
@@ -190,13 +203,18 @@ ComprehensiveResults.displayName = 'ComprehensiveResults';
 
 const ImageSidebar = memo(({ onImageClick }: { onImageClick: (slideIdx: number) => void }) => (
   <div className="w-64 border-l border-rui-divider/60 bg-rui-surface flex flex-col shrink-0">
-    <div className="p-3 border-b border-rui-divider/50 bg-rui-surface-strong">
-      <div className="flex items-center gap-2">
-        <ImageIcon className="w-3.5 h-3.5 text-rui-blue" />
-        <span className="text-[11px] text-rui-dark font-display font-medium uppercase tracking-wider">
-          废钢抓拍图
-        </span>
+    <div className="p-2 border-b border-rui-divider/50 bg-rui-surface-strong flex flex-between">
+      <div className="flex-1 flex items-between ">
+         <div className='flex flex-row items-center'>
+          <ImageIcon className="w-3.5 h-3.5 text-rui-blue" />
+          <span className="text-[11px] text-rui-dark font-display font-medium uppercase tracking-wider">
+            废钢抓拍图
+          </span>
+         </div>
+
+        
       </div>
+      <div className= 'text-xs hover:pointer rounded-[12px] px-1 bg-rui-action-blue'>更多</div>
     </div>
     <div className="flex-1 overflow-y-auto p-3 space-y-3 custom-scrollbar">
       {GALLERY_DATA.map((slide, sIdx) =>
@@ -236,7 +254,7 @@ export const CenterDashboardRegion = memo(
       <ComprehensiveResults activePointId={activePointId} onAction={onAction} />
 
       <div className="flex-1 flex min-h-0 overflow-hidden">
-        <div className="flex-1 p-3 flex flex-col gap-3 overflow-hidden">
+        <div className="flex-1 p-1 flex flex-col gap-1 overflow-hidden">
           <div className="flex flex-1 min-h-0 items-center justify-center">
             <VideoFeed
               id="01"
