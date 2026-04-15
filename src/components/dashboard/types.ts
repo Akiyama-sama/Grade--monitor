@@ -35,5 +35,3 @@ export interface MonitoringPoint {
 }
 
 export type DashboardActionType = 'abnormal' | 'end' | 'leave';
-
-export type DetailModalType = 'thickness' | 'material';

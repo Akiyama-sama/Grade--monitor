@@ -25,13 +25,7 @@ const metricToneClassMap = {
 } as const;
 
 const AnalysisPanel = memo(
-  ({
-    onShowThicknessDetails,
-    onShowMaterialDetails,
-  }: {
-    onShowThicknessDetails: () => void;
-    onShowMaterialDetails: () => void;
-  }) => (
+  () => (
   <div className="col-span-3 bg-rui-surface px-3 py-1.5 flex flex-col border-l border-rui-divider/60 min-h-0 overflow-hidden">
     <div className="mb-2 grid grid-cols-2 gap-1.5">
       {ANALYSIS_SUMMARY_METRICS.map((metric) => {
@@ -124,10 +118,10 @@ const AnalysisPanel = memo(
       </div>
     </div>
 
-    <div className="flex-1 min-h-0 grid grid-rows-[minmax(0,0.92fr)_minmax(0,1.08fr)] gap-2">
+    <div className="flex-1 min-h-0 grid grid-rows-[minmax(0,0.7fr)_minmax(0,1.3fr)] gap-2">
       <div className="bg-rui-surface-strong p-2.5 rounded-[15px] border border-rui-divider/60 flex min-h-0 flex-col">
-        <SectionHeader title="厚度占比" icon={Activity} onMore={onShowThicknessDetails} />
-        <div className="flex-1 flex flex-col justify-center space-y-1.5">
+        <SectionHeader title="厚度占比" icon={Activity} />
+        <div className="flex-1 flex flex-col justify-start space-y-1.5 pt-0.5">
           {THICKNESS_DATA.map((item) => {
             const thicknessWeight = Number.isFinite(grossWeight)
               ? `${(grossWeight * item.value / 100).toFixed(1)}t`
@@ -158,23 +152,23 @@ const AnalysisPanel = memo(
       </div>
 
       <div className="bg-rui-surface-strong p-2.5 rounded-[15px] border border-rui-divider/60 flex min-h-0 flex-col">
-        <SectionHeader title="料型占比" icon={LayoutGrid} onMore={onShowMaterialDetails} />
-        <div className="grid flex-1 grid-cols-3 content-center gap-2">
-          {MATERIAL_DATA.slice(0, 9).map((item) => (
+        <SectionHeader title="料型占比" icon={LayoutGrid} />
+        <div className="grid flex-1 grid-cols-4 content-center gap-1.5">
+          {MATERIAL_DATA.map((item) => (
             <div
               key={item.name}
-              className="relative overflow-hidden rounded-[14px] border border-rui-warning/30 bg-rui-warning/12 p-0"
+              className="relative overflow-hidden rounded-[12px] border border-rui-warning/30 bg-rui-warning/12 p-0"
             >
               <div className="absolute inset-0 bg-rui-warning/90" />
               <div
-                className="absolute inset-y-0 left-0 w-[48%] bg-rui-dark/90"
+                className="absolute inset-y-0 left-0 w-[47%] bg-rui-dark/92"
                 style={{ clipPath: 'polygon(0 0, 82% 0, 100% 100%, 0 100%)' }}
               />
-              <div className="relative z-10 flex min-h-[46px] items-center justify-between gap-1.5 px-2.5 py-2">
-                <span className="text-[9px] font-display font-medium text-rui-white tracking-wide">
+              <div className="relative z-10 flex min-h-[36px] items-center justify-between gap-1 px-2 py-1.5">
+                <span className="text-[8px] font-display font-medium text-rui-white tracking-wide">
                   {item.name}
                 </span>
-                <span className="text-[11px] font-display font-medium text-rui-dark tabular-nums tracking-tight">
+                <span className="text-[10px] font-display font-medium text-rui-dark tabular-nums tracking-tight">
                   {item.value}%
                 </span>
               </div>
@@ -188,19 +182,6 @@ const AnalysisPanel = memo(
 
 AnalysisPanel.displayName = 'AnalysisPanel';
 
-export const RightAnalysisRegion = memo(
-  ({
-    onShowThicknessDetails,
-    onShowMaterialDetails,
-  }: {
-    onShowThicknessDetails: () => void;
-    onShowMaterialDetails: () => void;
-  }) => (
-    <AnalysisPanel
-      onShowThicknessDetails={onShowThicknessDetails}
-      onShowMaterialDetails={onShowMaterialDetails}
-    />
-  ),
-);
+export const RightAnalysisRegion = memo(() => <AnalysisPanel />);
 
 RightAnalysisRegion.displayName = 'RightAnalysisRegion';

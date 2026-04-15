@@ -35,51 +35,39 @@ export const PROMPT_MESSAGES: MessagePrompt[] = [
 
 export const THICKNESS_DATA: GradingData[] = [
   {
-    name: '10-16mm',
-    value: 12,
-    color: CHART_COLORS.pink,
-    subItems: [
-      { name: '工字钢', value: 7 },
-      { name: '槽钢', value: 5 },
-    ],
-  },
-  {
     name: '6-10mm',
-    value: 38,
-    color: CHART_COLORS.blue,
+    value: 50,
+    color: CHART_COLORS.green,
     subItems: [
-      { name: '大圆管', value: 18 },
-      { name: '大方管', value: 20 },
+      { name: '大圆管', value: 24.5 },
+      { name: '大方管', value: 25.5 },
     ],
   },
   {
     name: '3-6mm',
-    value: 27,
-    color: CHART_COLORS.actionBlue,
+    value: 30,
+    color: '#FFE84E',
     subItems: [
-      { name: '电机壳', value: 8 },
-      { name: '镀锌板', value: 14 },
-      { name: '皮带轮', value: 5 },
+      { name: '电机壳', value: 10 },
+      { name: '镀锌板', value: 15 },
     ],
   },
   {
     name: '1-3mm',
     value: 15,
-    color: CHART_COLORS.teal,
+    color: '#26D9F6',
     subItems: [
       { name: '小车车架', value: 5 },
       { name: '前后桥壳', value: 3 },
-      { name: '减震器', value: 2 },
-      { name: '两轮车车圈', value: 5 },
     ],
   },
   {
     name: '0-1mm',
-    value: 8,
+    value: 5,
     color: CHART_COLORS.warning,
     subItems: [
-      { name: '钢丝', value: 5 },
-      { name: '广告牌', value: 3 },
+      { name: '钢丝', value: 3 },
+      { name: '广告牌', value: 2 },
     ],
   },
 ];
@@ -100,7 +88,7 @@ export const MATERIAL_DATA: GradingData[] = [
   { name: '轻废1', value: 0, color: CHART_COLORS.brown },
   { name: '轻废2', value: 0, color: CHART_COLORS.green },
   { name: '轻废3', value: 0, color: CHART_COLORS.blue },
-  { name: '轻薄4', value: 0, color: CHART_COLORS.actionBlue },
+  { name: '轻废4', value: 0, color: CHART_COLORS.actionBlue },
 ];
 
 export const DEDUCTION_DATA: DeductionItem[] = [

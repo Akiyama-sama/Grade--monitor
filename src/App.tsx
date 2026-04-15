@@ -7,7 +7,7 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ALARM_DATA, GALLERY_DATA } from './components/dashboard/constants';
 import { BackgroundAccents } from './components/dashboard/common';
-import type { DashboardActionType, DetailModalType } from './components/dashboard/types';
+import type { DashboardActionType } from './components/dashboard/types';
 import { CenterDashboardRegion } from './components/regions/CenterDashboardRegion';
 import { FloatingActionRegion } from './components/regions/FloatingActionRegion';
 import { LeftSidebarRegion } from './components/regions/LeftSidebarRegion';
@@ -17,7 +17,6 @@ import { TopBarRegion } from './components/regions/TopBarRegion';
 
 export default function App() {
   const [activePointId, setActivePointId] = useState('4');
-  const [detailType, setDetailType] = useState<DetailModalType | null>(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [confirmModal, setConfirmModal] = useState<{
@@ -32,9 +31,6 @@ export default function App() {
     action: () => {},
   });
 
-  const handleShowThicknessDetails = useCallback(() => setDetailType('thickness'), []);
-  const handleShowMaterialDetails = useCallback(() => setDetailType('material'), []);
-  const handleCloseDetails = useCallback(() => setDetailType(null), []);
   const handleOpenImageModal = useCallback((slideIdx: number) => {
     setCurrentSlide(slideIdx);
     setShowImageModal(true);
@@ -99,8 +95,6 @@ export default function App() {
   return (
     <div className="h-screen bg-rui-white text-rui-dark font-sans selection:bg-rui-blue/20 overflow-hidden flex flex-col">
       <ModalLayer
-        detailType={detailType}
-        onCloseDetails={handleCloseDetails}
         showImageModal={showImageModal}
         currentSlide={currentSlide}
         onPrevSlide={handlePrevSlide}
@@ -119,10 +113,7 @@ export default function App() {
           onAction={handleAction}
           onImageClick={handleOpenImageModal}
         />
-        <RightAnalysisRegion
-          onShowThicknessDetails={handleShowThicknessDetails}
-          onShowMaterialDetails={handleShowMaterialDetails}
-        />
+        <RightAnalysisRegion />
       </main>
 
       <FloatingActionRegion />
