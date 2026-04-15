@@ -35,21 +35,30 @@ export const PROMPT_MESSAGES: MessagePrompt[] = [
 
 export const THICKNESS_DATA: GradingData[] = [
   {
+    name: '10-16mm',
+    value: 12,
+    color: CHART_COLORS.pink,
+    subItems: [
+      { name: '工字钢', value: 7 },
+      { name: '槽钢', value: 5 },
+    ],
+  },
+  {
     name: '6-10mm',
-    value: 50,
+    value: 38,
     color: CHART_COLORS.blue,
     subItems: [
-      { name: '大圆管', value: 24.5 },
-      { name: '大方管', value: 25.5 },
+      { name: '大圆管', value: 18 },
+      { name: '大方管', value: 20 },
     ],
   },
   {
     name: '3-6mm',
-    value: 30,
+    value: 27,
     color: CHART_COLORS.actionBlue,
     subItems: [
-      { name: '电机壳', value: 10 },
-      { name: '镀锌板', value: 15 },
+      { name: '电机壳', value: 8 },
+      { name: '镀锌板', value: 14 },
       { name: '皮带轮', value: 5 },
     ],
   },
@@ -66,25 +75,25 @@ export const THICKNESS_DATA: GradingData[] = [
   },
   {
     name: '0-1mm',
-    value: 5,
+    value: 8,
     color: CHART_COLORS.warning,
     subItems: [
-      { name: '钢丝', value: 3 },
-      { name: '广告牌', value: 2 },
+      { name: '钢丝', value: 5 },
+      { name: '广告牌', value: 3 },
     ],
   },
 ];
 
 export const MATERIAL_DATA: GradingData[] = [
-  { name: '钢筋类', value: 40.5, color: CHART_COLORS.blue },
-  { name: '边角料', value: 29.5, color: CHART_COLORS.actionBlue },
+  { name: '钢筋类', value: 33, color: CHART_COLORS.blue },
+  { name: '边角料', value: 22, color: CHART_COLORS.actionBlue },
   { name: '破碎料', value: 10, color: CHART_COLORS.teal },
   { name: '拆车件', value: 10, color: CHART_COLORS.warning },
   { name: '压块', value: 5, color: CHART_COLORS.pink },
   { name: '钢屑', value: 5, color: CHART_COLORS.brown },
-  { name: '特级料', value: 0, color: CHART_COLORS.green },
-  { name: '重废1', value: 0, color: CHART_COLORS.blue },
-  { name: '重废2', value: 0, color: CHART_COLORS.actionBlue },
+  { name: '特级料', value: 5, color: CHART_COLORS.green },
+  { name: '重废1', value: 5, color: CHART_COLORS.blue },
+  { name: '重废2', value: 5, color: CHART_COLORS.actionBlue },
   { name: '中废1', value: 0, color: CHART_COLORS.teal },
   { name: '中废2', value: 0, color: CHART_COLORS.warning },
   { name: '中废3', value: 0, color: CHART_COLORS.pink },
@@ -145,8 +154,25 @@ export const BASIC_INFO = {
   cargoName: '重废2#',
   grossWeightTime: '2026-03-20 08:15:22',
   swipeTime: '2026-02-10 09:12:34',
-  elapsedMinutes: '--',
+  elapsedMinutes: '3 min',
 };
+
+export const ANALYSIS_SUMMARY_METRICS = [
+  {
+    id: 'water-yield',
+    label: '出水率',
+    value: 70,
+    unit: '%',
+    tone: 'blue',
+  },
+  {
+    id: 'carbon-emission',
+    label: '碳排放',
+    value: 218,
+    unit: 'kg',
+    tone: 'warning',
+  },
+] as const;
 
 export const MONITORING_POINTS: MonitoringPoint[] = [
   { id: '1', name: '1#监控点', plate: '冀B·1567K', status: 'normal' },

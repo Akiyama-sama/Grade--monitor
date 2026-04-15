@@ -54,20 +54,20 @@ export const AlarmItemCard = memo(({ item }: { item: AlarmItem }) => {
   const accentColorClass = 'text-rui-danger';
 
   return (
-    <div className={`p-3 rounded-[20px] border transition-all ${colorClass}`}>
-      <div className="flex justify-between items-start mb-2">
-        <span className={`text-[13px] font-display font-medium tracking-tight ${textColorClass}`}>
+    <div className={`p-2.5 rounded-[18px] border transition-all ${colorClass}`}>
+      <div className="flex justify-between items-start mb-1.5">
+        <span className={`text-[12px] font-display font-medium tracking-tight ${textColorClass}`}>
           {item.name}
         </span>
-        {isDanger && <AlertTriangle className={`w-3.5 h-3.5 ${accentColorClass}`} />}
+        {isDanger && <AlertTriangle className={`w-3 h-3 ${accentColorClass}`} />}
       </div>
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <div>
           <div className="text-[9px] text-rui-slate font-display font-medium uppercase tracking-wider mb-0.5">
             系统
           </div>
           <div
-            className={`text-base font-display font-medium tabular-nums ${item.system > 0 ? accentColorClass : 'text-rui-dark'}`}
+            className={`text-[15px] font-display font-medium tabular-nums ${item.system > 0 ? accentColorClass : 'text-rui-dark'}`}
           >
             {item.system}
           </div>
@@ -76,7 +76,7 @@ export const AlarmItemCard = memo(({ item }: { item: AlarmItem }) => {
           <div className="text-[9px] text-rui-slate font-display font-medium uppercase tracking-wider mb-0.5">
             复核
           </div>
-          <div className="text-base font-display font-medium tabular-nums text-rui-dark">
+          <div className="text-[15px] font-display font-medium tabular-nums text-rui-dark">
             {item.review}
           </div>
         </div>
