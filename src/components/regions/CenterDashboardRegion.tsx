@@ -66,23 +66,13 @@ const ComprehensiveResults = memo(({ activePointId, onAction }: ComprehensiveRes
                       </div>
                     </div>
                     <div className="min-w-0 border-l border-rui-divider/45 flex flex-col">
-                      <div className=''>
+                      <div className='pl-3'>
                         <div className="text-[8px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
                         综合厚度
                       </div>
                       <div className="">
                         <span className="text-[clamp(2rem,2.2vw,2.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-warning">
                           6
-                        </span>
-                      </div>
-                      </div>
-                      <div className=''>
-                        <div className="text-[8px] font-display font-medium uppercase tracking-[0.22em] text-rui-gray">
-                        出水率
-                      </div>
-                      <div className="">
-                        <span className="text-[clamp(2rem,2.2vw,2.4rem)] font-display font-medium leading-none tracking-[-0.06em] text-rui-blue">
-                          0.7
                         </span>
                       </div>
                       </div>
