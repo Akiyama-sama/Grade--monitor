@@ -1,5 +1,6 @@
 import type {
   AlarmItem,
+  DashboardScreen,
   DeductionItem,
   GradingData,
   MessagePrompt,
@@ -182,4 +183,10 @@ export const MONITORING_POINTS: MonitoringPoint[] = [
   { id: '5', name: '5#监控点', plate: '晋L·6624T', status: 'normal' },
   { id: '6', name: '6#监控点', plate: '皖S·9031P', status: 'normal' },
   { id: '7', name: '7#监控点', plate: '苏C·5178X', status: 'normal' },
+];
+
+export const DASHBOARD_SCREENS: Array<{ id: DashboardScreen; label: string }> = [
+  { id: 'image', label: '图像监控大屏' },
+  { id: 'queue', label: '排队监控大屏' },
+  { id: 'overview', label: '卸料点总览大屏' },
 ];

@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>用友 · 排队区监控大屏</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --rui-dark: #191c1f;
+      --rui-dark-2: #20252b;
+      --rui-dark-3: #2a3038;
+      --rui-line: rgba(255, 255, 255, 0.08);
+      --rui-line-soft: rgba(255, 255, 255, 0.05);
+      --rui-white: #ffffff;
+      --rui-light: #f4f4f4;
+      --rui-text: #f4f4f4;
+      --rui-text-2: #c9c9cd;
+      --rui-text-3: #8d969e;
+      --rui-text-4: #505a63;
+      --rui-blue: #494fdf;
+      --rui-teal: #00a87e;
+      --rui-danger: #e23b4a;
+      --rui-warning: #ec7e00;
+      --space-1: 4px;
+      --space-2: 8px;
+      --space-3: 12px;
+      --space-4: 16px;
+      --space-5: 24px;
+      --space-6: 32px;
+      --radius-s: 12px;
+      --radius-m: 20px;
+      --radius-pill: 9999px;
+      --font-display: "Aeonik Pro", "Inter", sans-serif;
+      --font-body: "Inter", sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 16% 14%, rgba(73, 79, 223, 0.08), transparent 22%),
+        radial-gradient(circle at 82% 18%, rgba(0, 168, 126, 0.06), transparent 20%),
+        linear-gradient(180deg, #1b1f23 0%, #14181b 100%);
+      color: var(--rui-text);
+      font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    body {
+      font-size: 12px;
+    }
+
+    button {
+      font: inherit;
+      border: none;
+      background: none;
+      color: inherit;
+    }
+
+    .screen {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      grid-template-rows: 62px 170px 1fr;
+      gap: 1px;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .topbar {
+      background: rgba(25, 28, 31, 0.94);
+      border-bottom: 1px solid var(--rui-line-soft);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--space-4);
+      padding: 0 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .brand-main {
+      font-family: var(--font-display);
+      font-size: 18px;
+      font-weight: 500;
+      letter-spacing: -0.03em;
+      color: var(--rui-white);
+    }
+
+    .brand-sub {
+      font-family: var(--font-display);
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 0.14em;
+      color: var(--rui-blue);
+      text-transform: uppercase;
+    }
+
+    .topbar-center {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+      color: var(--rui-text-3);
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 9px;
+      font-weight: 700;
+    }
+
+    .topbar-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--rui-teal);
+      flex-shrink: 0;
+    }
+
+    .topbar-right {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding-left: 18px;
+      border-left: 1px solid var(--rui-line);
+      flex-shrink: 0;
+    }
+
+    .clock-wrap {
+      text-align: right;
+    }
+
+    .clock-label {
+      color: var(--rui-text-4);
+      font-size: 8px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 3px;
+    }
+
+    .clock {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--rui-text);
+      letter-spacing: 0.06em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .overview {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        var(--rui-dark);
+      padding: 12px 16px;
+      display: grid;
+      grid-template-columns: minmax(250px, 1.05fr) minmax(320px, 1.3fr) minmax(320px, 1.35fr);
+      gap: 12px;
+      min-height: 0;
+    }
+
+    .overview-block {
+      min-height: 0;
+      border-radius: var(--radius-m);
+      border: 1px solid var(--rui-line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent),
+        var(--rui-dark-2);
+      padding: 12px 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      justify-content: space-between;
+      overflow: hidden;
+    }
+
+    .overview-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .overview-title {
+      font-family: var(--font-display);
+      font-size: 10px;
+      font-weight: 500;
+      color: var(--rui-text-3);
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+    }
+
+    .overview-note {
+      color: var(--rui-text-4);
+      font-size: 7px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .overview-total {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .overview-total .value {
+      font-family: var(--font-display);
+      font-size: 40px;
+      line-height: 0.9;
+      letter-spacing: -0.05em;
+      font-weight: 500;
+      color: var(--rui-white);
+    }
+
+    .overview-total .label {
+      color: var(--rui-text-3);
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .distribution-strip {
+      display: flex;
+      gap: 3px;
+      height: 10px;
+      border-radius: var(--radius-pill);
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .distribution-strip span {
+      height: 100%;
+    }
+
+    .distribution-strip .active {
+      background: var(--rui-blue);
+    }
+
+    .distribution-strip .loading {
+      background: var(--rui-teal);
+    }
+
+    .distribution-strip .idle {
+      background: rgba(255, 255, 255, 0.18);
+    }
+
+    .mini-legend {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mini-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      color: var(--rui-text-2);
+      font-size: 9px;
+      line-height: 1;
+    }
+
+    .mini-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .status-band {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 76px;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .status-lines {
+      display: grid;
+      gap: 6px;
+    }
+
+    .status-line {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .status-line .name {
+      color: var(--rui-text-3);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .status-line .bar {
+      height: 5px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+      margin-top: 3px;
+    }
+
+    .status-line .fill {
+      height: 100%;
+      border-radius: var(--radius-pill);
+    }
+
+    .status-line .count {
+      font-family: var(--font-display);
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: var(--rui-white);
+      white-space: nowrap;
+    }
+
+    .status-line.waiting .fill {
+      background: var(--rui-warning);
+    }
+
+    .status-line.loading .fill {
+      background: var(--rui-teal);
+    }
+
+    .status-line.idle .fill {
+      background: rgba(255, 255, 255, 0.24);
+    }
+
+    .overview-ring {
+      width: 76px;
+      height: 76px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      position: relative;
+      background: conic-gradient(var(--rui-teal) 0 20%, var(--rui-warning) 20% 80%, rgba(255,255,255,0.16) 80% 100%);
+    }
+
+    .overview-ring::after {
+      content: "";
+      position: absolute;
+      inset: 15px;
+      border-radius: 50%;
+      background: var(--rui-dark-2);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .ring-inner {
+      position: relative;
+      z-index: 1;
+      text-align: center;
+    }
+
+    .ring-inner .big {
+      font-family: var(--font-display);
+      font-size: 16px;
+      line-height: 1;
+      letter-spacing: -0.03em;
+    }
+
+    .ring-inner .small {
+      color: var(--rui-text-4);
+      font-size: 6px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 6px;
+    }
+
+    .rank-item {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .rank-item .rank-label {
+      color: var(--rui-text-2);
+      font-size: 9px;
+      white-space: nowrap;
+    }
+
+    .rank-item .rank-bar {
+      height: 7px;
+      border-radius: var(--radius-pill);
+      background: rgba(255, 255, 255, 0.05);
+      overflow: hidden;
+    }
+
+    .rank-item .rank-bar span {
+      display: block;
+      height: 100%;
+      border-radius: var(--radius-pill);
+      background: linear-gradient(90deg, var(--rui-blue), #6870ff);
+    }
+
+    .rank-item .rank-value {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--rui-text-2);
+      white-space: nowrap;
+    }
+
+    .queue-stage {
+      background: var(--rui-dark);
+      padding: 16px 18px 18px;
+      min-height: 0;
+      overflow-x: auto;
+      overflow-y: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: var(--rui-dark-3) transparent;
+    }
+
+    .queue-stage::-webkit-scrollbar {
+      height: 8px;
+    }
+
+    .queue-stage::-webkit-scrollbar-thumb {
+      background: var(--rui-dark-3);
+      border-radius: 999px;
+    }
+
+    .queue-grid {
+      display: grid;
+      min-height: 100%;
+      gap: 14px;
+      height: 100%;
+      width: max-content;
+      align-items: stretch;
+    }
+
+    .zone {
+      min-height: 100%;
+      border-radius: var(--radius-m);
+      border: 1px solid var(--rui-line);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.018), transparent),
+        var(--rui-dark-2);
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      overflow: hidden;
+    }
+
+    .zone.busy {
+      background:
+        linear-gradient(180deg, rgba(73, 79, 223, 0.06), transparent 48%),
+        var(--rui-dark-2);
+    }
+
+    .zone.loading {
+      background:
+        linear-gradient(180deg, rgba(0, 168, 126, 0.08), transparent 48%),
+        var(--rui-dark-2);
+    }
+
+    .zone.idle {
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.016), transparent),
+        #1d2227;
+    }
+
+    .zone-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .zone-title-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .zone-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .zone-name {
+      font-family: var(--font-display);
+      font-size: 24px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      font-weight: 500;
+      color: var(--rui-white);
+      white-space: nowrap;
+    }
+
+    .zone-sub {
+      color: var(--rui-text-4);
+      font-size: 9px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .zone-badges {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      min-height: 28px;
+      padding: 0 12px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background: rgba(255, 255, 255, 0.04);
+      color: var(--rui-text-2);
+      font-size: 9px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .pill.loading {
+      color: var(--rui-teal);
+      border-color: rgba(0, 168, 126, 0.20);
+      background: rgba(0, 168, 126, 0.10);
+    }
+
+    .pill.waiting {
+      color: var(--rui-warning);
+      border-color: rgba(236, 126, 0, 0.20);
+      background: rgba(236, 126, 0, 0.10);
+    }
+
+    .pill.idle {
+      color: var(--rui-text-3);
+    }
+
+    .zone-count {
+      font-family: var(--font-display);
+      font-size: 34px;
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      color: var(--rui-white);
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    .zone-count span {
+      display: block;
+      color: var(--rui-text-4);
+      font-family: var(--font-body);
+      font-size: 8px;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      margin-top: 5px;
+    }
+
+    .queue-flow {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .lead-vehicle {
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent),
+        rgba(255, 255, 255, 0.03);
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .lead-vehicle.loading {
+      border-color: rgba(0, 168, 126, 0.22);
+      background:
+        linear-gradient(180deg, rgba(0, 168, 126, 0.10), transparent),
+        rgba(255, 255, 255, 0.03);
+    }
+
+    .lead-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .lead-top {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .plate {
+      font-family: var(--font-display);
+      font-size: 28px;
+      line-height: 0.95;
+      font-weight: 500;
+      letter-spacing: -0.05em;
+      color: var(--rui-white);
+      white-space: nowrap;
+    }
+
+    .lead-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .queue-line {
+      position: relative;
+      min-height: 0;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      gap: 8px;
+      padding-left: 16px;
+    }
+
+    .queue-line::before {
+      content: "";
+      position: absolute;
+      left: 3px;
+      top: 4px;
+      bottom: 4px;
+      width: 2px;
+      border-radius: 999px;
+      background: linear-gradient(180deg, rgba(73, 79, 223, 0.22), rgba(73, 79, 223, 0.05));
+    }
+
+    .queue-chip {
+      min-width: 0;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 9px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1 1 170px;
+    }
+
+    .chip-plate {
+      font-family: var(--font-display);
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--rui-white);
+      white-space: nowrap;
+    }
+
+    .chip-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+
+    .zone-empty {
+      flex: 1;
+      border-radius: 18px;
+      border: 1px dashed rgba(255, 255, 255, 0.08);
+      background: rgba(255, 255, 255, 0.02);
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: center;
+      gap: 10px;
+      padding: 16px;
+      color: var(--rui-text-3);
+    }
+
+    .empty-main {
+      font-family: var(--font-display);
+      font-size: 22px;
+      line-height: 1;
+      letter-spacing: -0.04em;
+      color: var(--rui-text-2);
+    }
+
+    .empty-sub {
+      font-size: 10px;
+      line-height: 1.5;
+      color: var(--rui-text-4);
+    }
+
+    @media (max-width: 1680px) {
+      .screen {
+        grid-template-rows: 58px 158px 1fr;
+      }
+
+      .overview {
+        grid-template-columns: minmax(230px, 1fr) minmax(280px, 1.15fr) minmax(280px, 1.2fr);
+      }
+
+      .fluid-track {
+        grid-template-columns: minmax(190px, 0.84fr) minmax(218px, 0.96fr) minmax(360px, 1.5fr);
+        gap: 12px;
+      }
+
+      .fluid-stream,
+      .fluid-sediment {
+        padding-left: 12px;
+      }
+
+      .status-text {
+        font-size: 31px;
+      }
+
+      .thickness-value {
+        font-size: 24px;
+      }
+
+      .metric-sub .value {
+        font-size: 19px;
+      }
+
+      .total-val {
+        font-size: 28px;
+      }
+
+      .zone-name {
+        font-size: 22px;
+      }
+
+      .plate {
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 1440px) {
+      .screen {
+        min-width: 1440px;
+        overflow: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="screen">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-main">用友</div>
+        <div class="brand-sub">排队区监控大屏</div>
+      </div>
+      <div class="topbar-center">
+        <span class="topbar-dot"></span>
+        <span>Queue Monitor Active</span>
+      </div>
+      <div class="topbar-right">
+        <div class="clock-wrap">
+          <div class="clock-label">Current Time</div>
+          <div class="clock" id="clock">00:00:00</div>
+        </div>
+      </div>
+    </header>
+
+    <section class="overview">
+      <article class="overview-block">
+        <div class="overview-head">
+          <div class="overview-title">排队区总览</div>
+          <div class="overview-note">Single Screen</div>
+        </div>
+        <div class="overview-total">
+          <div class="value" id="totalQueued">0</div>
+          <div class="label">排队车次</div>
+        </div>
+        <div class="distribution-strip" id="zoneDistributionBar"></div>
+        <div class="mini-legend" id="zoneLegend"></div>
+      </article>
+
+      <article class="overview-block">
+        <div class="overview-head">
+          <div class="overview-title">车次状态分布</div>
+          <div class="overview-note">卸料中优先</div>
+        </div>
+        <div class="status-band">
+          <div class="status-lines" id="statusLines"></div>
+          <div class="overview-ring">
+            <div class="ring-inner">
+              <div class="big" id="activeZoneCount">0</div>
+              <div class="small">活跃排队区</div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="overview-block">
+        <div class="overview-head">
+          <div class="overview-title">排队区热度排序</div>
+          <div class="overview-note">Busy First</div>
+        </div>
+        <div class="rank-list" id="rankList"></div>
+      </article>
+    </section>
+
+    <section class="queue-stage">
+      <div class="queue-grid" id="queueGrid"></div>
+    </section>
+  </div>
+
+  <script>
+    const queueAreas = [
+      {
+        area: "4#排队区",
+        lane: "B 通道",
+        pointLabel: "2#卸料点",
+        vehicles: [
+          { plate: "冀A·88888", point: "2#", status: "卸料中" },
+          { plate: "豫N·3205Q", point: "2#", status: "等待" },
+          { plate: "鲁H·7281M", point: "2#", status: "等待" },
+          { plate: "晋L·6624T", point: "2#", status: "等待" },
+          { plate: "苏C·5178R", point: "2#", status: "等待" }
+        ]
+      },
+      {
+        area: "2#排队区",
+        lane: "A 通道",
+        pointLabel: "1#卸料点",
+        vehicles: [
+          { plate: "皖S·9031P", point: "1#", status: "卸料中" },
+          { plate: "鄂J·2406W", point: "1#", status: "等待" },
+          { plate: "冀B·1567K", point: "1#", status: "等待" }
+        ]
+      },
+      {
+        area: "6#排队区",
+        lane: "C 通道",
+        pointLabel: "3#卸料点",
+        vehicles: [
+          { plate: "豫A·5518M", point: "3#", status: "等待" },
+          { plate: "鲁B·9187Q", point: "3#", status: "等待" }
+        ]
+      },
+      {
+        area: "1#排队区",
+        lane: "A 通道",
+        pointLabel: "A 卸料点",
+        vehicles: [
+          { plate: "津F·3208R", point: "A", status: "等待" }
+        ]
+      },
+      {
+        area: "3#排队区",
+        lane: "B 通道",
+        pointLabel: "B 卸料点",
+        vehicles: []
+      },
+      {
+        area: "5#排队区",
+        lane: "C 通道",
+        pointLabel: "C 卸料点",
+        vehicles: []
+      },
+      {
+        area: "7#排队区",
+        lane: "D 通道",
+        pointLabel: "1#卸料点",
+        vehicles: []
+      },
+      {
+        area: "8#排队区",
+        lane: "D 通道",
+        pointLabel: "2#卸料点",
+        vehicles: []
+      }
+    ];
+
+    function formatClock() {
+      const now = new Date();
+      const pad = (value) => String(value).padStart(2, "0");
+      document.getElementById("clock").textContent =
+        `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+      setTimeout(formatClock, 1000);
+    }
+
+    function sortVehicles(vehicles) {
+      return [...vehicles].sort((a, b) => {
+        const priority = (item) => item.status === "卸料中" ? 0 : 1;
+        return priority(a) - priority(b);
+      });
+    }
+
+    function sortAreas(areas) {
+      return [...areas].sort((a, b) => {
+        const activeA = a.vehicles.length > 0 ? 0 : 1;
+        const activeB = b.vehicles.length > 0 ? 0 : 1;
+        if (activeA !== activeB) return activeA - activeB;
+        const unloadingA = a.vehicles.some((v) => v.status === "卸料中") ? 0 : 1;
+        const unloadingB = b.vehicles.some((v) => v.status === "卸料中") ? 0 : 1;
+        if (unloadingA !== unloadingB) return unloadingA - unloadingB;
+        return b.vehicles.length - a.vehicles.length;
+      });
+    }
+
+    function renderOverview(areas) {
+      const totalQueued = areas.reduce((sum, area) => sum + area.vehicles.length, 0);
+      const loadingCount = areas.reduce((sum, area) => sum + area.vehicles.filter((v) => v.status === "卸料中").length, 0);
+      const waitingCount = totalQueued - loadingCount;
+      const activeAreas = areas.filter((area) => area.vehicles.length > 0).length;
+      const idleAreas = areas.length - activeAreas;
+
+      document.getElementById("totalQueued").textContent = totalQueued;
+      document.getElementById("activeZoneCount").textContent = activeAreas;
+
+      const zoneDistributionBar = document.getElementById("zoneDistributionBar");
+      const activePct = (activeAreas / areas.length) * 100;
+      const idlePct = 100 - activePct;
+      zoneDistributionBar.innerHTML = `
+        <span class="active" style="width:${activePct}%"></span>
+        <span class="idle" style="width:${idlePct}%"></span>
+      `;
+
+      const zoneLegend = document.getElementById("zoneLegend");
+      zoneLegend.innerHTML = `
+        <div class="mini-legend-item"><span class="mini-dot" style="background:var(--rui-blue)"></span><span>有车排队 ${activeAreas}</span></div>
+        <div class="mini-legend-item"><span class="mini-dot" style="background:rgba(255,255,255,.24)"></span><span>空闲排队区 ${idleAreas}</span></div>
+      `;
+
+      const statusLines = document.getElementById("statusLines");
+      const loadingPct = totalQueued ? (loadingCount / totalQueued) * 100 : 0;
+      const waitingPct = totalQueued ? (waitingCount / totalQueued) * 100 : 0;
+      const idlePctCars = totalQueued ? 0 : 100;
+      statusLines.innerHTML = `
+        <div class="status-line loading">
+          <div>
+            <div class="name">卸料中车次</div>
+            <div class="bar"><div class="fill" style="width:${loadingPct}%"></div></div>
+          </div>
+          <div class="count">${loadingCount}</div>
+        </div>
+        <div class="status-line waiting">
+          <div>
+            <div class="name">等待车次</div>
+            <div class="bar"><div class="fill" style="width:${waitingPct}%"></div></div>
+          </div>
+          <div class="count">${waitingCount}</div>
+        </div>
+        <div class="status-line idle">
+          <div>
+            <div class="name">空闲排队区</div>
+            <div class="bar"><div class="fill" style="width:${idlePctCars || (idleAreas / areas.length) * 100}%"></div></div>
+          </div>
+          <div class="count">${idleAreas}</div>
+        </div>
+      `;
+
+      const rankList = document.getElementById("rankList");
+      const ranked = [...areas].sort((a, b) => b.vehicles.length - a.vehicles.length).slice(0, 4);
+      const maxVehicles = Math.max(...ranked.map((area) => area.vehicles.length), 1);
+      rankList.innerHTML = ranked.map((area) => `
+        <div class="rank-item">
+          <div class="rank-label">${area.area}</div>
+          <div class="rank-bar"><span style="width:${(area.vehicles.length / maxVehicles) * 100}%"></span></div>
+          <div class="rank-value">${area.vehicles.length} 台</div>
+        </div>
+      `).join("");
+    }
+
+    function renderQueueAreas(areas) {
+      const queueGrid = document.getElementById("queueGrid");
+      const sortedAreas = sortAreas(areas);
+      queueGrid.className = "queue-grid";
+      const visibleColumns = Math.min(Math.max(sortedAreas.length, 1), 4);
+      queueGrid.style.gridAutoFlow = "column";
+      queueGrid.style.gridAutoColumns = `calc((100vw - 36px - ${14 * (visibleColumns - 1)}px) / ${visibleColumns})`;
+
+      queueGrid.innerHTML = sortedAreas.map((area) => {
+        const sortedVehicles = sortVehicles(area.vehicles);
+        const lead = sortedVehicles[0];
+        const waiting = sortedVehicles.slice(lead && lead.status === "卸料中" ? 1 : 0);
+        const waitingCount = sortedVehicles.filter((vehicle) => vehicle.status === "等待").length;
+        const loadingCount = sortedVehicles.filter((vehicle) => vehicle.status === "卸料中").length;
+        const zoneClass = area.vehicles.length === 0
+          ? "idle"
+          : loadingCount > 0
+            ? "loading"
+            : "busy";
+
+        const badgeHtml = area.vehicles.length === 0
+          ? `<span class="pill idle">空闲</span>`
+          : `
+            ${loadingCount > 0 ? `<span class="pill loading">卸料中 ${loadingCount}</span>` : ""}
+            ${waitingCount > 0 ? `<span class="pill waiting">等待 ${waitingCount}</span>` : ""}
+          `;
+
+        const leadHtml = area.vehicles.length === 0
+          ? `
+            <div class="zone-empty">
+              <div class="empty-main">${area.area} 当前无排队车次</div>
+              <div class="empty-sub">当前卸料点：${area.pointLabel}<br>该排队区后置展示，但仍保留独立监控模块。</div>
+            </div>
+          `
+          : `
+            <div class="lead-vehicle ${lead.status === "卸料中" ? "loading" : ""}">
+              <div class="lead-main">
+                <div class="lead-top">
+                  <div class="plate">${lead.plate}</div>
+                  <span class="pill ${lead.status === "卸料中" ? "loading" : "waiting"}">${lead.status}</span>
+                </div>
+                <div class="lead-meta">
+                  <span class="pill">当前卸料点 ${lead.point}</span>
+                  <span class="pill">队首车次</span>
+                </div>
+              </div>
+            </div>
+          `;
+
+        const queueHtml = waiting.length > 0
+          ? `
+            <div class="queue-line">
+              ${waiting.map((vehicle) => `
+                <div class="queue-chip">
+                  <div class="chip-plate">${vehicle.plate}</div>
+                  <div class="chip-meta">
+                    <span class="pill waiting">等待</span>
+                    <span class="pill">卸料点 ${vehicle.point}</span>
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          `
+          : "";
+
+        return `
+          <article class="zone ${zoneClass}">
+            <div class="zone-head">
+              <div class="zone-title-wrap">
+                <div class="zone-title">
+                  <div class="zone-name">${area.area}</div>
+                  <div class="zone-sub">${area.lane}</div>
+                </div>
+                <div class="zone-badges">${badgeHtml}</div>
+              </div>
+              <div class="zone-count">${area.vehicles.length}<span>当前排队车次</span></div>
+            </div>
+            <div class="queue-flow">
+              ${leadHtml}
+              ${queueHtml}
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    formatClock();
+    renderOverview(queueAreas);
+    renderQueueAreas(queueAreas);
+  </script>
+</body>
+</html>

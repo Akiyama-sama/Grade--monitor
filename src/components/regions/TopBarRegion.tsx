@@ -2,7 +2,13 @@ import { memo, useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 
-import { MONITORING_POINTS } from '../dashboard/constants';
+import { DASHBOARD_SCREENS, MONITORING_POINTS } from '../dashboard/constants';
+import type { DashboardScreen } from '../dashboard/types';
+
+const SCREEN_STATUS_TEXT: Record<Exclude<DashboardScreen, 'image'>, string> = {
+  queue: 'Queue Monitor Active',
+  overview: 'Unloading Overview Active',
+};
 
 const DigitalClock = memo(() => {
   const [time, setTime] = useState(new Date());
@@ -76,72 +82,82 @@ MonitoringSwitcher.displayName = 'MonitoringSwitcher';
 interface TopBarRegionProps {
   activePointId: string;
   onPointSelect: (id: string) => void;
+  currentScreen: DashboardScreen;
+  onScreenChange: (screen: DashboardScreen) => void;
 }
 
-export const TopBarRegion = memo(({ activePointId, onPointSelect }: TopBarRegionProps) => {
-  const [showNav, setShowNav] = useState(false);
-  const [currentScreen, setCurrentScreen] = useState('图像监控大屏');
+export const TopBarRegion = memo(
+  ({ activePointId, onPointSelect, currentScreen, onScreenChange }: TopBarRegionProps) => {
+    const [showNav, setShowNav] = useState(false);
+    const currentScreenMeta =
+      DASHBOARD_SCREENS.find((screen) => screen.id === currentScreen) ?? DASHBOARD_SCREENS[0];
 
-  const screens = ['图像监控大屏', '排队区大屏', '监控点总览'];
+    return (
+      <header className="h-12 border-b border-rui-divider/60 flex items-center px-6 bg-rui-surface z-50 shrink-0 relative">
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="rounded-[9999px] border border-rui-divider/60 bg-rui-surface-strong px-3 py-1.5 text-[12px] font-display font-medium tracking-[0.16em] text-rui-dark">
+              用友
+            </div>
+            <div className="h-6 w-px bg-rui-divider/60 mx-1" />
+            <div className="relative">
+              <button onClick={() => setShowNav(!showNav)} className="flex items-center gap-2 group">
+                <span className="text-xl font-display font-medium text-rui-dark tracking-[-0.03em] group-hover:text-rui-blue transition-colors">
+                  {currentScreenMeta.label}
+                </span>
+                <ChevronDown
+                  className={`w-4 h-4 text-rui-slate transition-transform ${showNav ? 'rotate-180' : ''}`}
+                />
+              </button>
 
-  return (
-    <header className="h-12 border-b border-rui-divider/60 flex items-center px-6 bg-rui-surface z-50 shrink-0 relative">
-      <div className="flex items-center gap-4 shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-[12px] bg-rui-surface-strong flex items-center justify-center border border-rui-divider/60">
-            <span className="text-[10px] font-display font-medium text-rui-blue">LOGO</span>
-          </div>
-          <div className="h-6 w-px bg-rui-divider/60 mx-1" />
-          <div className="relative">
-            <button onClick={() => setShowNav(!showNav)} className="flex items-center gap-2 group">
-              <span className="text-xl font-display font-medium text-rui-dark tracking-[-0.03em] group-hover:text-rui-blue transition-colors">
-                {currentScreen}
-              </span>
-              <ChevronDown
-                className={`w-4 h-4 text-rui-slate transition-transform ${showNav ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            <AnimatePresence>
-              {showNav && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="absolute top-full left-0 mt-2 w-48 bg-rui-surface-strong border border-rui-divider/70 rounded-[20px] z-[60] overflow-hidden"
-                >
-                  {screens.map((screen) => (
-                    <button
-                      key={screen}
-                      onClick={() => {
-                        setCurrentScreen(screen);
-                        setShowNav(false);
-                      }}
-                      className={`w-full text-left px-4 py-3 text-sm font-display font-medium transition-colors ${
-                        currentScreen === screen
-                          ? 'bg-rui-blue/10 text-rui-dark'
-                          : 'text-rui-slate hover:bg-rui-surface'
-                      }`}
-                    >
-                      {screen}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
+              <AnimatePresence>
+                {showNav && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="absolute top-full left-0 mt-2 w-48 bg-rui-surface-strong border border-rui-divider/70 rounded-[20px] z-[60] overflow-hidden"
+                  >
+                    {DASHBOARD_SCREENS.map((screen) => (
+                      <button
+                        key={screen.id}
+                        onClick={() => {
+                          onScreenChange(screen.id);
+                          setShowNav(false);
+                        }}
+                        className={`w-full text-left px-4 py-3 text-sm font-display font-medium transition-colors ${
+                          currentScreen === screen.id
+                            ? 'bg-rui-blue/10 text-rui-dark'
+                            : 'text-rui-slate hover:bg-rui-surface'
+                        }`}
+                      >
+                        {screen.label}
+                      </button>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="h-6 w-px bg-rui-divider/60 mx-6 shrink-0" />
+        <div className="h-6 w-px bg-rui-divider/60 mx-6 shrink-0" />
 
-      <MonitoringSwitcher activeId={activePointId} onSelect={onPointSelect} />
+        {currentScreen === 'image' ? (
+          <MonitoringSwitcher activeId={activePointId} onSelect={onPointSelect} />
+        ) : (
+          <div className="flex flex-1 items-center justify-center gap-2 text-[10px] font-display font-medium uppercase tracking-[0.16em] text-rui-slate">
+            <span className="h-2 w-2 rounded-full bg-rui-teal" />
+            {SCREEN_STATUS_TEXT[currentScreen]}
+          </div>
+        )}
 
-      <div className="h-6 w-px bg-rui-divider/60 mx-6 shrink-0" />
+        <div className="h-6 w-px bg-rui-divider/60 mx-6 shrink-0" />
 
-      <DigitalClock />
-    </header>
-  );
-});
+        <DigitalClock />
+      </header>
+    );
+  },
+);
 
 TopBarRegion.displayName = 'TopBarRegion';

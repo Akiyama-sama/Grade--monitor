@@ -34,4 +34,6 @@ export interface MonitoringPoint {
   status: 'normal' | 'warning';
 }
 
+export type DashboardScreen = 'image' | 'queue' | 'overview';
+
 export type DashboardActionType = 'abnormal' | 'end' | 'leave';

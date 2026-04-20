@@ -7,16 +7,19 @@ import { useCallback, useMemo, useState } from 'react';
 
 import { ALARM_DATA, GALLERY_DATA } from './components/dashboard/constants';
 import { BackgroundAccents } from './components/dashboard/common';
-import type { DashboardActionType } from './components/dashboard/types';
+import type { DashboardActionType, DashboardScreen } from './components/dashboard/types';
+import { QueueMonitorScreen } from './components/queue-monitor/QueueMonitorScreen';
 import { CenterDashboardRegion } from './components/regions/CenterDashboardRegion';
 import { FloatingActionRegion } from './components/regions/FloatingActionRegion';
 import { LeftSidebarRegion } from './components/regions/LeftSidebarRegion';
 import { ModalLayer } from './components/regions/ModalLayer';
 import { RightAnalysisRegion } from './components/regions/RightAnalysisRegion';
 import { TopBarRegion } from './components/regions/TopBarRegion';
+import { UnloadingOverviewScreen } from './components/unloading-overview/UnloadingOverviewScreen';
 
 export default function App() {
   const [activePointId, setActivePointId] = useState('4');
+  const [currentScreen, setCurrentScreen] = useState<DashboardScreen>('image');
   const [showImageModal, setShowImageModal] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [confirmModal, setConfirmModal] = useState<{
@@ -94,30 +97,47 @@ export default function App() {
 
   return (
     <div className="h-screen bg-rui-white text-rui-dark font-sans selection:bg-rui-blue/20 overflow-hidden flex flex-col">
-      <ModalLayer
-        showImageModal={showImageModal}
-        currentSlide={currentSlide}
-        onPrevSlide={handlePrevSlide}
-        onNextSlide={handleNextSlide}
-        onCloseImageModal={handleCloseImageModal}
-        confirmModal={confirmModal}
-        onCancelConfirm={() => setConfirmModal((prev) => ({ ...prev, show: false }))}
+      {currentScreen === 'image' && (
+        <ModalLayer
+          showImageModal={showImageModal}
+          currentSlide={currentSlide}
+          onPrevSlide={handlePrevSlide}
+          onNextSlide={handleNextSlide}
+          onCloseImageModal={handleCloseImageModal}
+          confirmModal={confirmModal}
+          onCancelConfirm={() => setConfirmModal((prev) => ({ ...prev, show: false }))}
+        />
+      )}
+
+      <TopBarRegion
+        activePointId={activePointId}
+        onPointSelect={setActivePointId}
+        currentScreen={currentScreen}
+        onScreenChange={setCurrentScreen}
       />
 
-      <TopBarRegion activePointId={activePointId} onPointSelect={setActivePointId} />
+      {currentScreen === 'image' ? (
+        <main className="flex-1 grid grid-cols-12 gap-px bg-rui-divider/40 overflow-hidden">
+          <LeftSidebarRegion sortedAlarms={sortedAlarms} />
+          <CenterDashboardRegion
+            activePointId={activePointId}
+            onAction={handleAction}
+            onImageClick={handleOpenImageModal}
+          />
+          <RightAnalysisRegion />
+        </main>
+      ) : currentScreen === 'queue' ? (
+        <QueueMonitorScreen />
+      ) : (
+        <UnloadingOverviewScreen />
+      )}
 
-      <main className="flex-1 grid grid-cols-12 gap-px bg-rui-divider/40 overflow-hidden">
-        <LeftSidebarRegion sortedAlarms={sortedAlarms} />
-        <CenterDashboardRegion
-          activePointId={activePointId}
-          onAction={handleAction}
-          onImageClick={handleOpenImageModal}
-        />
-        <RightAnalysisRegion />
-      </main>
-
-      <FloatingActionRegion />
-      <BackgroundAccents />
+      {currentScreen === 'image' && (
+        <>
+          <FloatingActionRegion />
+          <BackgroundAccents />
+        </>
+      )}
     </div>
   );
 }
