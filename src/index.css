@@ -111,6 +111,18 @@
   }
 }
 
+@keyframes alarm-row-outline {
+  0%, 100% {
+    outline: 1px solid color-mix(in srgb, var(--color-rui-danger) 42%, transparent);
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-rui-danger) 0%, transparent);
+  }
+
+  50% {
+    outline: 1px solid color-mix(in srgb, var(--color-rui-danger) 88%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-rui-danger) 24%, transparent);
+  }
+}
+
 @keyframes alarm-dot-breathe {
   0%, 100% {
     opacity: 0.65;
@@ -127,6 +139,11 @@
 
 .alarm-border-breathe {
   animation: alarm-border-breathe 1.8s ease-in-out infinite;
+}
+
+.alarm-row-outline {
+  outline-offset: -1px;
+  animation: alarm-row-outline 1.8s ease-in-out infinite;
 }
 
 .alarm-dot-breathe {

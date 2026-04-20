@@ -53,13 +53,13 @@ export const LeftSidebarRegion = memo(({ sortedAlarms }: LeftSidebarRegionProps)
             <table className="w-full border-separate border-spacing-x-0 border-spacing-y-1 text-left">
               <thead className="bg-rui-surface-strong">
                 <tr>
-                  <th className="px-3 py-2 text-[8px] font-display font-medium tracking-[0.08em] text-rui-slate">
+                  <th className="px-3 py-1.5 text-[7px] font-display font-medium tracking-[0.08em] text-rui-slate">
                     报警物
                   </th>
-                  <th className="w-[60px] px-2 py-2 text-center text-[8px] font-display font-medium tracking-[0.08em] text-rui-slate">
+                  <th className="w-[56px] px-2 py-1.5 text-center text-[7px] font-display font-medium tracking-[0.08em] text-rui-slate">
                     系统
                   </th>
-                  <th className="w-[60px] px-2 py-2 text-center text-[8px] font-display font-medium tracking-[0.08em] text-rui-slate">
+                  <th className="w-[56px] px-2 py-1.5 text-center text-[7px] font-display font-medium tracking-[0.08em] text-rui-slate">
                     复核
                   </th>
                 </tr>
@@ -68,32 +68,33 @@ export const LeftSidebarRegion = memo(({ sortedAlarms }: LeftSidebarRegionProps)
                 {sortedAlarms.map((item, index) => {
                   const isActive = item.status === 'danger' || item.status === 'warning' || item.system > 0;
                   const reviewValue = item.review === 0 ? '0' : item.review || '-';
-                  const rowBorderClass = isActive
-                    ? 'alarm-border-breathe border-rui-danger/65'
-                    : 'border-rui-divider/55';
+                  const rowClass = isActive ? 'alarm-row-outline' : '';
                   const indicatorClass = isActive
                     ? 'alarm-dot-breathe bg-rui-danger'
                     : 'bg-rui-blue/80';
 
                   return (
-                    <tr key={item.id} className={index === sortedAlarms.length - 1 ? 'last-row' : undefined}>
+                    <tr
+                      key={item.id}
+                      className={`${rowClass} ${index === sortedAlarms.length - 1 ? 'last-row' : ''}`}
+                    >
                       <td
-                        className={`rounded-l-[12px] border-y border-l bg-rui-surface px-3 py-1.5 ${rowBorderClass}`}
+                        className="rounded-l-[12px] border-r border-rui-divider/35 bg-rui-surface px-3 py-1"
                       >
                         <div className="flex items-center gap-2">
                           <span className={`h-1.5 w-1.5 rounded-full ${indicatorClass}`} />
-                          <span className="text-[11px] font-display font-medium tracking-tight text-rui-dark">
+                          <span className="text-[10px] font-display font-medium tracking-tight text-rui-dark">
                             {item.name}
                           </span>
                         </div>
                       </td>
                       <td
-                        className={`border-y bg-rui-surface px-2 py-1.5 text-center text-[11px] font-display font-medium tabular-nums ${rowBorderClass} ${item.system > 0 ? 'text-rui-danger' : 'text-rui-slate'}`}
+                        className={`border-r border-rui-divider/35 bg-rui-surface px-2 py-1 text-center text-[10px] font-display font-medium tabular-nums ${item.system > 0 ? 'text-rui-danger' : 'text-rui-slate'}`}
                       >
                         {item.system > 0 ? item.system : '-'}
                       </td>
                       <td
-                        className={`rounded-r-[12px] border-y border-r bg-rui-surface px-2 py-1.5 text-center text-[11px] font-display font-medium tabular-nums ${rowBorderClass} ${reviewValue !== '-' ? 'text-rui-warning' : 'text-rui-slate'}`}
+                        className={`rounded-r-[12px] bg-rui-surface px-2 py-1 text-center text-[10px] font-display font-medium tabular-nums ${reviewValue !== '-' ? 'text-rui-warning' : 'text-rui-slate'}`}
                       >
                         {reviewValue}
                       </td>
