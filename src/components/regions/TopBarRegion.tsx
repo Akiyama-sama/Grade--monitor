@@ -147,8 +147,8 @@ export const TopBarRegion = memo(
           <MonitoringSwitcher activeId={activePointId} onSelect={onPointSelect} />
         ) : (
           <div className="flex flex-1 items-center justify-center gap-2 text-[10px] font-display font-medium uppercase tracking-[0.16em] text-rui-slate">
-            <span className="h-2 w-2 rounded-full bg-rui-teal" />
-            {SCREEN_STATUS_TEXT[currentScreen]}
+            {/* <span className="h-2 w-2 rounded-full bg-rui-teal" /> */}
+            {/* {SCREEN_STATUS_TEXT[currentScreen]} */}
           </div>
         )}
 
